@@ -1,0 +1,16 @@
+# Local planning/export files
+plan.doc
+plan.md
+
+# Firebase Admin SDK/service account keys. Never commit private keys.
+*-firebase-adminsdk-*.json
+*service-account*.json
+firebase-admin*.json
+
+# Local environment files
+.env
+.env.*
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
