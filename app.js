@@ -64,6 +64,7 @@ const state = {
   settings: null,
   data: {},
   loading: true,
+  authReady: false,
   error: "",
   toast: ""
 };
@@ -80,6 +81,7 @@ async function boot() {
   });
 
   state.services.auth.onAuthChange(async (profile) => {
+    state.authReady = true;
     state.profile = profile;
     if (profile) {
       await refreshData();
@@ -88,6 +90,10 @@ async function boot() {
       render();
     }
   });
+
+  // Local mode resolves auth synchronously; render the splash immediately
+  // for Firebase mode while the persisted session is being restored.
+  render();
 }
 
 async function refreshData() {
@@ -116,6 +122,19 @@ async function refreshData() {
 }
 
 function render() {
+  // Until the auth provider reports its first result, show the splash rather
+  // than the login form — this avoids a flash of the login screen on refresh
+  // while a persisted session is being restored.
+  if (!state.authReady) {
+    appRoot.innerHTML = `
+      <div class="boot-screen">
+        <div class="boot-mark">GF</div>
+        <p>Loading GymFlow...</p>
+      </div>
+    `;
+    return;
+  }
+
   if (!state.profile) {
     renderAuth(appRoot, {
       services: state.services,
