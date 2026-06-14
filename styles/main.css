@@ -45,6 +45,12 @@
   --topbar-bg:       rgba(244,247,245,0.88);
   --topbar-border:   rgba(224,227,225,0.8);
   --nav-scrim:       rgba(18,18,18,0.52);
+
+  /* Color-theme accent helpers (overridden per [data-color-theme]) */
+  --primary-fade:    rgba(204,255,0,0.14);  /* status pill bg, code bg */
+  --primary-subtle:  rgba(204,255,0,0.12);  /* nav active bg */
+  --primary-glow:    rgba(204,255,0,0.26);  /* button hover shadow */
+
   --r-xs:   6px;
   --r-sm:   8px;
   --r-md:   12px;
@@ -269,7 +275,7 @@ h2 {
 .nav-list a:active { transform: scale(0.98); }
 
 .nav-list a.active {
-  background: rgba(204,255,0,0.13);
+  background: var(--primary-subtle);
   color: #fff;
 }
 
@@ -283,7 +289,7 @@ h2 {
   width: 3px;
   border-radius: 0 3px 3px 0;
   background: var(--primary);
-  box-shadow: 0 0 8px rgba(204,255,0,0.5);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--primary) 50%, transparent);
 }
 
 .nav-icon {
@@ -365,7 +371,7 @@ h2 {
 .profile-chip .avatar {
   background: #252928;
   color: var(--primary);
-  border: 1px solid rgba(204,255,0,0.18);
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent);
 }
 
 .name-cell { display: flex; align-items: center; gap: 10px; min-width: 0; }
@@ -500,7 +506,7 @@ h2 {
 .pill-button:hover {
   transform: scale(1.03);
   background: var(--primary-strong);
-  box-shadow: 0 4px 16px rgba(204,255,0,0.28);
+  box-shadow: 0 4px 16px var(--primary-glow);
 }
 
 .pill-button:active { transform: scale(0.97); }
@@ -678,7 +684,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 .primary-button { background: var(--primary); color: var(--on-primary); }
-.primary-button:hover { transform: scale(1.02); background: var(--primary-strong); box-shadow: 0 4px 14px rgba(204,255,0,0.24); }
+.primary-button:hover { transform: scale(1.02); background: var(--primary-strong); box-shadow: 0 4px 14px var(--primary-glow); }
 .primary-button:active { transform: scale(0.97); box-shadow: none; }
 
 .ghost-button, .file-button { background: transparent; border-color: var(--line); color: var(--ink); }
@@ -750,13 +756,13 @@ input:focus, select:focus, textarea:focus {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  background: rgba(204,255,0,0.15);
+  background: var(--primary-fade);
   color: var(--green-ink);
 }
 
 .status.expiring-soon, .status.pending, .status.partial { background: var(--warning-bg); color: var(--warning); }
 .status.expired, .status.suspended, .status.refunded { background: var(--danger-bg); color: var(--danger); }
-.status.paid, .status.active, .status.sent { background: rgba(204,255,0,0.15); color: var(--green-ink); }
+.status.paid, .status.active, .status.sent { background: var(--primary-fade); color: var(--green-ink); }
 
 /* ===== Cards ===== */
 .card-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
@@ -842,7 +848,7 @@ input:focus, select:focus, textarea:focus {
   letter-spacing: 0.1em;
   padding: 10px 16px;
   border-radius: var(--r-sm);
-  background: rgba(204,255,0,0.14);
+  background: var(--primary-fade);
   color: var(--green-ink);
 }
 
@@ -1073,6 +1079,178 @@ code { padding: 2px 6px; border-radius: 5px; background: var(--surface-strong); 
 /* ===== Scrollbar ===== */
 @supports (scrollbar-width: thin) {
   * { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+}
+
+/* ===================================================================
+   COLOR THEMES  (set via gym.config.js → data-color-theme on <html>)
+
+   Each theme overrides only accent tokens; light/dark surfaces are
+   controlled separately by data-theme="dark" (user-toggled).
+
+   Themes:
+     neon-lime      — default, already in :root
+     electric-blue  — Azure blue + Emerald  (energetic, modern)
+     fire-orange    — Blaze orange + Gold   (high-intensity)
+     crimson-force  — Power red + Amber     (aggressive)
+     ultra-violet   — Purple + Indigo       (premium/tech)
+     arctic-cyan    — Cyan + Mint           (cool, ice)
+     solar-gold     — Champion gold + Orange (achievement)
+     plasma-pink    — Hot pink + Purple     (vibrant/bold)
+     matrix-green   — Terminal green + Teal (hacker/tech)
+     midnight-teal  — Deep teal + Indigo    (calm/focus)
+   =================================================================== */
+
+/* ── electric-blue ─────────────────────────────────────────────── */
+[data-color-theme="electric-blue"] {
+  --primary:        #0a84ff;
+  --primary-strong: #0070d8;
+  --on-primary:     #ffffff;
+  --primary-fade:   rgba(10,132,255,0.14);
+  --primary-subtle: rgba(10,132,255,0.11);
+  --primary-glow:   rgba(10,132,255,0.26);
+  --teal:           #34c759;
+  --teal-ink:       #006b28;
+  --green-ink:      #004494;
+}
+[data-theme="dark"][data-color-theme="electric-blue"] {
+  --teal-ink:  #4da6ff;
+  --green-ink: #4da6ff;
+}
+
+/* ── fire-orange ───────────────────────────────────────────────── */
+[data-color-theme="fire-orange"] {
+  --primary:        #ff6b00;
+  --primary-strong: #e05f00;
+  --on-primary:     #ffffff;
+  --primary-fade:   rgba(255,107,0,0.14);
+  --primary-subtle: rgba(255,107,0,0.11);
+  --primary-glow:   rgba(255,107,0,0.26);
+  --teal:           #ffd60a;
+  --teal-ink:       #7a5c00;
+  --green-ink:      #7a3300;
+}
+[data-theme="dark"][data-color-theme="fire-orange"] {
+  --teal-ink:  #ffb340;
+  --green-ink: #ff8f3a;
+}
+
+/* ── crimson-force ─────────────────────────────────────────────── */
+[data-color-theme="crimson-force"] {
+  --primary:        #ff2d55;
+  --primary-strong: #e0163f;
+  --on-primary:     #ffffff;
+  --primary-fade:   rgba(255,45,85,0.14);
+  --primary-subtle: rgba(255,45,85,0.11);
+  --primary-glow:   rgba(255,45,85,0.26);
+  --teal:           #ff9f0a;
+  --teal-ink:       #7a4500;
+  --green-ink:      #8a0022;
+}
+[data-theme="dark"][data-color-theme="crimson-force"] {
+  --teal-ink:  #ffa040;
+  --green-ink: #ff6b85;
+}
+
+/* ── ultra-violet ──────────────────────────────────────────────── */
+[data-color-theme="ultra-violet"] {
+  --primary:        #bf5af2;
+  --primary-strong: #a84de0;
+  --on-primary:     #ffffff;
+  --primary-fade:   rgba(191,90,242,0.14);
+  --primary-subtle: rgba(191,90,242,0.11);
+  --primary-glow:   rgba(191,90,242,0.26);
+  --teal:           #5e5ce6;
+  --teal-ink:       #2c2ab8;
+  --green-ink:      #5a0090;
+}
+[data-theme="dark"][data-color-theme="ultra-violet"] {
+  --teal-ink:  #a389f5;
+  --green-ink: #d68ef7;
+}
+
+/* ── arctic-cyan ───────────────────────────────────────────────── */
+[data-color-theme="arctic-cyan"] {
+  --primary:        #00d4ff;
+  --primary-strong: #00b8e0;
+  --on-primary:     #121212;
+  --primary-fade:   rgba(0,212,255,0.14);
+  --primary-subtle: rgba(0,212,255,0.11);
+  --primary-glow:   rgba(0,212,255,0.26);
+  --teal:           #00ff88;
+  --teal-ink:       #006b44;
+  --green-ink:      #006688;
+}
+[data-theme="dark"][data-color-theme="arctic-cyan"] {
+  --teal-ink:  #40e0ff;
+  --green-ink: #40e0ff;
+}
+
+/* ── solar-gold ────────────────────────────────────────────────── */
+[data-color-theme="solar-gold"] {
+  --primary:        #ffd60a;
+  --primary-strong: #e0bb00;
+  --on-primary:     #121212;
+  --primary-fade:   rgba(255,214,10,0.14);
+  --primary-subtle: rgba(255,214,10,0.11);
+  --primary-glow:   rgba(255,214,10,0.26);
+  --teal:           #ff6b00;
+  --teal-ink:       #7a3300;
+  --green-ink:      #7a6200;
+}
+[data-theme="dark"][data-color-theme="solar-gold"] {
+  --teal-ink:  #ffb340;
+  --green-ink: #ffe040;
+}
+
+/* ── plasma-pink ───────────────────────────────────────────────── */
+[data-color-theme="plasma-pink"] {
+  --primary:        #ff375f;
+  --primary-strong: #e0204a;
+  --on-primary:     #ffffff;
+  --primary-fade:   rgba(255,55,95,0.14);
+  --primary-subtle: rgba(255,55,95,0.11);
+  --primary-glow:   rgba(255,55,95,0.26);
+  --teal:           #bf5af2;
+  --teal-ink:       #6a1a9a;
+  --green-ink:      #8a0032;
+}
+[data-theme="dark"][data-color-theme="plasma-pink"] {
+  --teal-ink:  #d68ef7;
+  --green-ink: #ff7a95;
+}
+
+/* ── matrix-green ──────────────────────────────────────────────── */
+[data-color-theme="matrix-green"] {
+  --primary:        #00ff41;
+  --primary-strong: #00e038;
+  --on-primary:     #121212;
+  --primary-fade:   rgba(0,255,65,0.14);
+  --primary-subtle: rgba(0,255,65,0.11);
+  --primary-glow:   rgba(0,255,65,0.26);
+  --teal:           #00c7be;
+  --teal-ink:       #006660;
+  --green-ink:      #007a1f;
+}
+[data-theme="dark"][data-color-theme="matrix-green"] {
+  --teal-ink:  #26e0d7;
+  --green-ink: #40ff60;
+}
+
+/* ── midnight-teal ─────────────────────────────────────────────── */
+[data-color-theme="midnight-teal"] {
+  --primary:        #00c7be;
+  --primary-strong: #00afa7;
+  --on-primary:     #121212;
+  --primary-fade:   rgba(0,199,190,0.14);
+  --primary-subtle: rgba(0,199,190,0.11);
+  --primary-glow:   rgba(0,199,190,0.26);
+  --teal:           #5e5ce6;
+  --teal-ink:       #2c2ab8;
+  --green-ink:      #005555;
+}
+[data-theme="dark"][data-color-theme="midnight-teal"] {
+  --teal-ink:  #a389f5;
+  --green-ink: #26e0d7;
 }
 
 /* ===================================================================
