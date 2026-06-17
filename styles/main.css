@@ -965,6 +965,24 @@ input:focus, select:focus, textarea:focus {
 .auth-form .primary-button { margin-top: 4px; }
 .auth-note { margin-top: 14px; color: var(--muted); font-size: 0.88rem; }
 
+/* Inline auth feedback (login/register success + error). */
+.auth-msg {
+  margin: 0 0 4px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.auth-msg.error {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+.auth-msg.success {
+  background: var(--primary-fade, rgba(204, 255, 0, 0.18));
+  color: var(--green-ink);
+}
+
 .hidden { display: none !important; }
 
 /* ===== Modal ===== */

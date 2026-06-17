@@ -48,9 +48,17 @@ export const settingsModule = {
     const form = root.querySelector("#settings-form");
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
-      await context.services.data.saveSettings(formData(form));
+      const payload = formData(form);
+      // The gym name shows in the sidebar, so only a name change needs a full
+      // shell re-render; everything else can use the lightweight scoped update.
+      const nameChanged = (payload.gymName || "") !== (context.settings?.gymName || "");
+      await context.services.data.saveSettings(payload);
       context.toast("Settings saved.");
-      await context.refresh();
+      if (nameChanged) {
+        await context.refresh();
+      } else {
+        await context.refreshView();
+      }
     });
 
     root.querySelector("[data-action='copy-code']")?.addEventListener("click", async () => {
