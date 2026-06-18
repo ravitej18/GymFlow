@@ -61,9 +61,29 @@ export function renderAuth(root, context) {
         <p class="auth-note">${escapeHtml(context.mode === "firebase" ? "Your gym data is saved and synced automatically." : "Running in demo mode on this device.")}</p>
       </section>
     </main>
+    <div class="toast" data-auth-toast></div>
   `;
 
   bindAuth(root, context);
+}
+
+// Show an inline message inside the active auth form (error or success).
+function authMessage(root, text, type = "error") {
+  // Place the message at the top of whichever form is currently visible.
+  const visibleForm = root.querySelector(".auth-form:not(.hidden)");
+  if (!visibleForm) return;
+  let box = visibleForm.querySelector("[data-auth-msg]");
+  if (!box) {
+    box = document.createElement("p");
+    box.dataset.authMsg = "true";
+    visibleForm.prepend(box);
+  }
+  box.className = `auth-msg ${type}`;
+  box.textContent = text;
+}
+
+function clearAuthMessages(root) {
+  root.querySelectorAll("[data-auth-msg]").forEach((el) => el.remove());
 }
 
 function bindAuth(root, context) {
@@ -81,6 +101,7 @@ function bindAuth(root, context) {
       const isLogin = button.dataset.authTab === "login";
       loginForm.classList.toggle("hidden", !isLogin);
       registerPanel.classList.toggle("hidden", isLogin);
+      clearAuthMessages(root);
     });
   });
 
@@ -91,12 +112,13 @@ function bindAuth(root, context) {
       button.classList.add("active");
       const mode = button.dataset.registerMode;
       Object.entries(registerForms).forEach(([key, form]) => form.classList.toggle("hidden", key !== mode));
+      clearAuthMessages(root);
     });
   });
 
   loginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    await run(context, async () => {
+    await run(root, context, async () => {
       const data = Object.fromEntries(new FormData(loginForm).entries());
       await context.services.auth.login(data.email, data.password);
       context.onToast("Welcome back.");
@@ -105,7 +127,7 @@ function bindAuth(root, context) {
 
   registerForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    await run(context, async () => {
+    await run(root, context, async () => {
       const data = Object.fromEntries(new FormData(registerForm).entries());
       await context.services.auth.registerOwner(data);
       context.onToast("Owner account created.");
@@ -114,7 +136,7 @@ function bindAuth(root, context) {
 
   memberForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    await run(context, async () => {
+    await run(root, context, async () => {
       const data = Object.fromEntries(new FormData(memberForm).entries());
       await context.services.auth.registerMember(data);
       context.onToast("Welcome! Your gym membership is set up.");
@@ -123,7 +145,7 @@ function bindAuth(root, context) {
 
   trainerForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    await run(context, async () => {
+    await run(root, context, async () => {
       const data = Object.fromEntries(new FormData(trainerForm).entries());
       await context.services.auth.registerTrainer(data);
       context.onToast("Welcome! Your trainer profile is set up.");
@@ -131,7 +153,7 @@ function bindAuth(root, context) {
   });
 
   root.querySelector("[data-action='demo']")?.addEventListener("click", async () => {
-    await run(context, async () => {
+    await run(root, context, async () => {
       await context.services.auth.useDemo();
       context.onToast("Demo workspace loaded.");
     });
@@ -140,20 +162,33 @@ function bindAuth(root, context) {
   root.querySelector("[data-action='reset-password']")?.addEventListener("click", async () => {
     const email = loginForm.email.value;
     if (!email) {
-      context.onToast("Enter your email first.");
+      authMessage(root, "Enter your email first.", "error");
       return;
     }
-    await run(context, async () => {
+    await run(root, context, async () => {
       await context.services.auth.resetPassword(email);
-      context.onToast(context.mode === "firebase" ? "Password reset email sent." : "Local account found. Use its saved password.");
+      const msg = context.mode === "firebase" ? "Password reset email sent." : "Local account found. Use its saved password.";
+      authMessage(root, msg, "success");
+      authToast(root, msg);
     });
   });
 }
 
-async function run(context, action) {
+async function run(root, context, action) {
+  clearAuthMessages(root);
   try {
     await action();
   } catch (error) {
-    context.onToast(error.message || "Something went wrong.");
+    authMessage(root, error.message || "Something went wrong.", "error");
   }
+}
+
+// Lightweight toast shown on the auth screen (the global one lives in the app shell).
+function authToast(root, message) {
+  const toast = root.querySelector("[data-auth-toast]");
+  if (!toast) return;
+  toast.textContent = message;
+  toast.classList.add("show");
+  clearTimeout(authToast.timer);
+  authToast.timer = setTimeout(() => toast.classList.remove("show"), 2800);
 }
