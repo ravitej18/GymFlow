@@ -24,6 +24,7 @@ function makeData() {
     trainer_attendance: [],
     workout_templates: [],
     workout_assignments: [],
+    workout_sessions: [],
     progress_records: [],
     reminders: []
   };

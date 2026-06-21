@@ -80,6 +80,7 @@ const collectionNames = [
   "attendance",
   "workout_templates",
   "workout_assignments",
+  "workout_sessions",
   "progress_records",
   "reminders",
   "trainer_attendance"
