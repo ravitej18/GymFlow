@@ -15,6 +15,7 @@ import { settingsModule } from "./modules/settings.js";
 import { myMembershipModule } from "./modules/my-membership.js";
 import { myPaymentsModule } from "./modules/my-payments.js";
 import { trainerCheckinModule } from "./modules/trainer-checkin.js";
+import { trainerMembersModule } from "./modules/trainer-members.js";
 
 const appRoot = document.querySelector("#app");
 
@@ -44,6 +45,7 @@ const nav = [
   ["my-payments", "My Payments", "receipt_long", ["member"]],
   ["trainer-checkin", "Check In", "how_to_reg", ["trainer"]],
   ["my-checkins", "My Check-ins", "history", ["trainer"]],
+  ["trainer-members", "My Members", "group", ["trainer"]],
   ["settings", "Settings", "settings", ["owner"]]
 ];
 
@@ -63,6 +65,7 @@ const modules = {
   "my-payments": myPaymentsModule,
   "trainer-checkin": trainerCheckinModule,
   "my-checkins": trainerCheckinModule,
+  "trainer-members": trainerMembersModule,
   settings: settingsModule
 };
 
