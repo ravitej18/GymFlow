@@ -6,7 +6,8 @@
     "requireTests": false,
     "requireReview": false,
     "branchPerPhase": true,
-    "commitConvention": "conventional"
+    "commitConvention": "conventional",
+    "_auto_chain_active": false
   },
   "agents": {
     "profile": "balanced"
