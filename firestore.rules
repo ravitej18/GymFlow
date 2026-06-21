@@ -144,6 +144,40 @@ service cloud.firestore {
       allow update, delete: if owner() && sameGym();
     }
 
+    // Trainer-authored workout sessions. Any same-gym user can read (member sees
+    // their own client-side). Trainer can create sessions for members in their gym
+    // by proving the trainerId in the doc matches their own trainers roster uid.
+    match /workout_sessions/{docId} {
+      allow read: if sameGym();
+      allow create: if incomingSameGym() && (
+        owner()
+        || (
+          myRole() == "trainer"
+          && request.resource.data.gymId == myGymId()
+          && exists(/databases/$(database)/documents/trainers/$(request.resource.data.trainerId))
+          && get(/databases/$(database)/documents/trainers/$(request.resource.data.trainerId)).data.uid == uid()
+        )
+      );
+      allow update, delete: if owner() && sameGym();
+    }
+
+    // Trainer-to-member template assignments. Any same-gym user can read. Trainer
+    // can create assignments for members in their gym using the same uid check.
+    match /workout_assignments/{docId} {
+      allow read: if sameGym();
+      allow create: if incomingSameGym() && (
+        owner()
+        || (
+          myRole() == "trainer"
+          && request.resource.data.gymId == myGymId()
+          && exists(/databases/$(database)/documents/trainers/$(request.resource.data.trainerId))
+          && get(/databases/$(database)/documents/trainers/$(request.resource.data.trainerId)).data.uid == uid()
+        )
+      );
+      allow update: if (owner() || myRole() == "trainer") && sameGym() && incomingSameGym();
+      allow delete: if owner() && sameGym();
+    }
+
     // Everything else (plans, payments, progress, workouts, reminders):
     // same-gym read; owner-only writes.
     match /{collection}/{docId} {

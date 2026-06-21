@@ -1,12 +1,28 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: executing
+last_updated: "2026-06-21T08:53:45.029Z"
+progress:
+  total_phases: 14
+  completed_phases: 0
+  total_plans: 3
+  completed_plans: 0
+  percent: 0
+---
+
 # GymFlow — Project State
 
 ## Current Status
+
 - **Milestone:** v0.9 Beta
 - **Active Branch:** `ui/dark-mode-animations-polish`
 - **Last Phase Completed:** Phase 6 — UI Design System & Dark Mode
 - **Next Phase:** Phase 7 — Trainer-Member Workout Assignment
 
 ## Completed Phases
+
 | Phase | Name | Branch/Commit | Date |
 |---|---|---|---|
 | 1 | Core Member Lifecycle | main | — |
@@ -17,6 +33,7 @@
 | 6 | UI Design System & Dark Mode | ui/dark-mode-animations-polish | 2026-06-14 |
 
 ## Upcoming Phases (Priority Order)
+
 | Phase | Name | Priority |
 |---|---|---|
 | 7 | Trainer-Member Workout Assignment | NEXT |
@@ -29,13 +46,15 @@
 | 14 | Advanced Operations | BACKLOG |
 
 ## In-Progress Work
+
 - **Branch:** `ui/dark-mode-animations-polish`
 - **Commits:**
   - `3515298` — ui: dark/light mode, tablet layout, motion system, nav polish, topbar toggle
   - `ff22862` — ui: add 10 config-file color themes with flash-free boot
-- **Status:** Phase 6 UI work is code-complete; pending merge to main
+- **Status:** Executing Phase 07
 
 ## Key Architectural Facts
+
 - No build step — pure ES modules, served from any HTTP server
 - `lib/firebase-init.js` is the only abstraction layer (Firebase ↔ localStorage)
 - `app.js` owns all routing, state, rendering shell
@@ -46,14 +65,17 @@
 - CSS design tokens: all colors via `--token` vars; 10 color themes in main.css; dark mode via `data-theme` on `<html>`
 
 ## Open Decisions
+
 - Phase 8 (Member Portal v2): needs UX design for notification opt-in flow
 - Phase 12 (Multi-Branch): Firestore security rules need significant redesign for branch scoping
 - Phase 13 (Payment Gateway): Firebase Functions needed for webhook; adds server-side complexity
 
 ## Blockers
+
 None currently.
 
 ## Notes
+
 - `smoke-test.mjs` should be run before each PR to verify all module renders produce valid HTML
 - `scripts/seed-demo.js` and `scripts/seed-members.js` are for demo environment setup only
 - `gym.config.js` is git-ignored (contains real Firebase keys) — `.template` is the public version

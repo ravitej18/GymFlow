@@ -6,6 +6,7 @@ export const collections = {
   attendance: "attendance",
   workouts: "workout_templates",
   assignments: "workout_assignments",
+  workoutSessions: "workout_sessions",
   progress: "progress_records",
   reminders: "reminders",
   trainerAttendance: "trainer_attendance"

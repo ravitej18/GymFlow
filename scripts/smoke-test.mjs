@@ -13,6 +13,8 @@ import { settingsModule } from "../modules/settings.js";
 import { myMembershipModule } from "../modules/my-membership.js";
 import { myPaymentsModule } from "../modules/my-payments.js";
 import { trainerCheckinModule } from "../modules/trainer-checkin.js";
+import { trainerMembersModule } from "../modules/trainer-members.js";
+import { myWorkoutModule } from "../modules/my-workout.js";
 
 function makeData() {
   return {
@@ -24,6 +26,7 @@ function makeData() {
     trainer_attendance: [],
     workout_templates: [],
     workout_assignments: [],
+    workout_sessions: [],
     progress_records: [],
     reminders: []
   };
@@ -56,7 +59,7 @@ const ownerModules = [
 ];
 
 const memberModules = [
-  dashboardModule, attendanceModule, progressModule, myMembershipModule, myPaymentsModule
+  dashboardModule, attendanceModule, progressModule, myMembershipModule, myPaymentsModule, myWorkoutModule
 ];
 
 const trainerContext = {
@@ -69,7 +72,7 @@ const trainerContext = {
 };
 trainerContext.data.trainers = [trainerContext.myTrainer];
 
-const trainerModules = [dashboardModule, trainerCheckinModule];
+const trainerModules = [dashboardModule, trainerCheckinModule, trainerMembersModule];
 
 function checkRender(module, context, label) {
   const html = module.render(context);
