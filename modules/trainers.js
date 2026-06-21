@@ -1,8 +1,53 @@
-import { byName, collections, emptyState, escapeHtml, formData, pageHeader, statusClass, withButtonLoading } from "./utils.js";
+import { byName, collections, dateLabel, emptyState, escapeHtml, findName, formData, pageHeader, statusClass, withButtonLoading } from "./utils.js";
 
 export const trainersModule = {
   render({ data }) {
     const trainers = [...(data.trainers || [])].sort(byName);
+
+    // Compute current assignment per member (latest assignedAt wins)
+    const allAssignments = data.workout_assignments || [];
+    const members = data.members || [];
+    const templates = data.workout_templates || [];
+
+    // Group assignments by memberId and keep the most recent one per member
+    const assignmentByMember = new Map();
+    for (const a of allAssignments) {
+      const existing = assignmentByMember.get(a.memberId);
+      if (!existing || String(a.assignedAt || "").localeCompare(String(existing.assignedAt || "")) > 0) {
+        assignmentByMember.set(a.memberId, a);
+      }
+    }
+    const currentAssignments = Array.from(assignmentByMember.values());
+
+    const assignmentOverview = `
+      <section class="panel">
+        <div class="panel-heading">
+          <h2>Workout Assignments</h2>
+          <span>${currentAssignments.length} assigned</span>
+        </div>
+        ${
+          currentAssignments.length
+            ? `<div class="data-table">
+                <div class="table-head">
+                  <span>Member</span>
+                  <span>Trainer</span>
+                  <span>Template</span>
+                  <span>Assigned</span>
+                </div>
+                ${currentAssignments.map(a => `
+                  <div class="table-row" style="grid-template-columns:1fr 1fr 1fr auto">
+                    <span>${escapeHtml(findName(members, a.memberId, "—"))}</span>
+                    <span>${escapeHtml(findName(trainers, a.trainerId, "—"))}</span>
+                    <span>${escapeHtml(findName(templates, a.templateId, "—"))}</span>
+                    <span>${escapeHtml(dateLabel(a.assignedAt))}</span>
+                  </div>
+                `).join("")}
+              </div>`
+            : emptyState("No assignments yet", "Trainers' workout assignments will appear here.")
+        }
+      </section>
+    `;
+
     return `
       ${pageHeader("Trainers")}
       <div class="work-grid">
@@ -28,6 +73,7 @@ export const trainersModule = {
           }
         </section>
       </div>
+      ${assignmentOverview}
     `;
   },
   bind(root, context) {
