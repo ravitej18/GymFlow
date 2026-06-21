@@ -14,6 +14,7 @@ import { myMembershipModule } from "../modules/my-membership.js";
 import { myPaymentsModule } from "../modules/my-payments.js";
 import { trainerCheckinModule } from "../modules/trainer-checkin.js";
 import { trainerMembersModule } from "../modules/trainer-members.js";
+import { myWorkoutModule } from "../modules/my-workout.js";
 
 function makeData() {
   return {
@@ -58,7 +59,7 @@ const ownerModules = [
 ];
 
 const memberModules = [
-  dashboardModule, attendanceModule, progressModule, myMembershipModule, myPaymentsModule
+  dashboardModule, attendanceModule, progressModule, myMembershipModule, myPaymentsModule, myWorkoutModule
 ];
 
 const trainerContext = {

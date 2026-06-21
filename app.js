@@ -16,6 +16,7 @@ import { myMembershipModule } from "./modules/my-membership.js";
 import { myPaymentsModule } from "./modules/my-payments.js";
 import { trainerCheckinModule } from "./modules/trainer-checkin.js";
 import { trainerMembersModule } from "./modules/trainer-members.js";
+import { myWorkoutModule } from "./modules/my-workout.js";
 
 const appRoot = document.querySelector("#app");
 
@@ -43,6 +44,7 @@ const nav = [
   ["reports", "Reports", "bar_chart", ["owner"]],
   ["my-membership", "My Membership", "card_membership", ["member"]],
   ["my-payments", "My Payments", "receipt_long", ["member"]],
+  ["my-workout", "My Workout", "fitness_center", ["member"]],
   ["trainer-checkin", "Check In", "how_to_reg", ["trainer"]],
   ["my-checkins", "My Check-ins", "history", ["trainer"]],
   ["trainer-members", "My Members", "group", ["trainer"]],
@@ -66,6 +68,7 @@ const modules = {
   "trainer-checkin": trainerCheckinModule,
   "my-checkins": trainerCheckinModule,
   "trainer-members": trainerMembersModule,
+  "my-workout": myWorkoutModule,
   settings: settingsModule
 };
 
