@@ -141,7 +141,66 @@
 - [ ] Online payment link generation for members
 - [ ] Payment status webhook → auto-update Firestore
 
-### Misc Improvements
+### Trainer-Member Workout Assignment (Phase 7)
+- [ ] Trainer view: assigned members list with member goals
+- [ ] Trainer assigns a workout template to a member (workout_assignments collection, schema exists)
+- [ ] Trainer creates "today's session" for a member: date, exercises with sets/reps/weight targets, notes — can override template per day
+- [ ] `workout_sessions` Firestore collection for trainer-authored per-day session records
+- [ ] Member "My Workout Today" screen: shows today's trainer session if exists, else falls back to assigned template
+- [ ] Member: workout assignment history view (when was template last changed)
+- [ ] Owner view: see all assignments per trainer and per member
+
+### Member Portal v2 (Phase 8)
+- [ ] Member self-edit profile (mobile, email, address)
+- [ ] Member payment receipt view (own receipts)
+- [ ] Member can see their assigned trainer
+- [ ] Member can view assigned workout plan (Phase 7 integration)
+- [ ] Notification bell (in-app + PWA push) for expiry warning
+
+### Membership Pause & Freeze (Phase 9)
+- [ ] New member status: `Paused`
+- [ ] Owner pauses a membership: set pause start date, expected return date, reason
+- [ ] `membership_pauses` Firestore collection for pause history per member
+- [ ] Member `endDate` auto-extends by pause duration when pause is created
+- [ ] Owner resumes membership; `endDate` re-adjusts if returned early
+- [ ] Per-plan config: `max_pauses_per_cycle` (default: 2), `max_pause_days` (default: 30)
+- [ ] Pause history log on member profile
+- [ ] Dashboard KPI: Paused members count
+- [ ] Renewal queue: exclude paused members while their pause is active
+- [ ] Firestore rules: only owner can write to `membership_pauses`
+
+### Member Workout Logging & Exercise Library (Phase 10)
+- [ ] Exercise library with ~80 built-in exercises: name, muscle group, equipment type, category
+- [ ] Owner can add custom exercises for their gym
+- [ ] Owner can deactivate exercises they don't want in the picker
+- [ ] Member "Log Workout" form: date (default today), exercises from library picker, sets × reps × weight (strength) or duration (cardio), session notes
+- [ ] Member "My Workouts" history: all past logged sessions in chronological order
+- [ ] Personal Record (PR) badge: auto-detect highest weight × reps per exercise in history
+- [ ] Owner can view any member's workout log from the member profile
+- [ ] Exercise library management under Settings or Workouts (owner)
+- [ ] Firestore collections: `exercise_library`, `workout_logs`, `workout_log_entries`
+- [ ] Firestore rules: members can write only own logs; owner can read all
+
+### Analytics & Insights (Phase 11)
+- [ ] Revenue trend chart with monthly/weekly toggle
+- [ ] Member growth chart (new members per month)
+- [ ] Attendance heatmap / daily breakdown
+- [ ] Plan popularity breakdown (which plans are most sold)
+- [ ] Inactive member alert dashboard
+
+### Multi-Branch Support (Phase 12)
+- [ ] Branch entity: a gym can have multiple locations
+- [ ] Members, attendance, and payments scoped to a branch
+- [ ] Owner cross-branch dashboard (aggregate view)
+- [ ] Staff assigned per-branch
+
+### Payment Gateway Integration (Phase 13)
+- [ ] Razorpay integration (India primary market)
+- [ ] Stripe integration (international)
+- [ ] Online payment link generation for members
+- [ ] Payment status webhook → auto-update Firestore
+
+### Advanced Operations (Phase 14)
 - [ ] Bulk member import from CSV/Excel
 - [ ] Audit log (who changed what, when)
 - [ ] Custom renewal reminder message templates

@@ -40,13 +40,18 @@ Independent gym owners in emerging markets (primarily India) pay ₹3,000–₹1
 | Collection | Purpose |
 |---|---|
 | `members` | Member roster, plan assignment, dates, status |
-| `membership_plans` | Plans with name, duration, price |
+| `membership_plans` | Plans with name, duration, price, pause config |
+| `membership_pauses` | Pause/freeze records per member (Phase 9) |
 | `payments` | Payment records linked to member + plan |
 | `attendance` | Member check-in records |
 | `trainer_attendance` | Trainer self check-in records |
 | `trainers` | Trainer roster linked by uid |
 | `workout_templates` | Reusable workout plan templates |
-| `workout_assignments` | Plan-to-member assignments |
+| `workout_assignments` | Trainer → member template assignments |
+| `workout_sessions` | Trainer-authored per-day session for a member (Phase 7) |
+| `exercise_library` | Built-in + owner-custom exercise definitions (Phase 10) |
+| `workout_logs` | Member self-logged workout session headers (Phase 10) |
+| `workout_log_entries` | Individual exercise entries per logged session (Phase 10) |
 | `progress_records` | Member body metrics over time (weight, BMI, body fat, waist, chest) |
 | `reminders` | Logged WhatsApp reminder events |
 | `users` | Auth user profiles (name, role, gymId, uid) |

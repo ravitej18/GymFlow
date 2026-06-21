@@ -92,10 +92,28 @@ Deliverables:
 
 ---
 
-## 🔲 Phase 7 — Member Portal v2
+## 🔲 Phase 7 — Trainer-Member Workout Assignment
+**Status:** NOT STARTED
+**Priority:** HIGH — NEXT UP
+**Depends on:** Phase 3 (workout_templates, workout_assignments schema exists)
+
+Goal: Bridge trainer workflow with member experience — trainers assign workout plans, deliver today's session, and members consume their workout.
+
+Deliverables:
+- [ ] Trainer view: list of assigned members with their goals
+- [ ] Trainer UI: assign workout template to a member (writes to `workout_assignments`)
+- [ ] Trainer UI: create "today's session" for a member — select from assigned template or customize per day (sets, reps, weight targets, notes)
+- [ ] `workout_sessions` Firestore collection: trainer-authored session records (member, date, exercises, notes)
+- [ ] Member view: "My Workout Today" screen — shows today's trainer-authored session if one exists, otherwise shows assigned template
+- [ ] Member view: full assignment history (what template is currently assigned, when it changed)
+- [ ] Owner view: assignment list per trainer and member
+
+---
+
+## 🔲 Phase 8 — Member Portal v2
 **Status:** NOT STARTED
 **Priority:** HIGH
-**Depends on:** Phase 6
+**Depends on:** Phase 6, Phase 7
 
 Goal: Significantly upgrade the member-facing experience so members actively use the app rather than just being managed through it.
 
@@ -103,29 +121,59 @@ Deliverables:
 - [ ] Member self-edit profile (name, mobile, address)
 - [ ] Member view own payment receipts
 - [ ] Member view assigned trainer details
-- [ ] Member view assigned workout plan
+- [ ] Member view assigned workout plan (consumes Phase 7 data)
 - [ ] PWA push notification opt-in for expiry reminders
 - [ ] In-app notification badge on dashboard
 
 ---
 
-## 🔲 Phase 8 — Trainer-Member Workout Assignment
+## 🔲 Phase 9 — Membership Pause & Freeze
 **Status:** NOT STARTED
 **Priority:** HIGH
-**Depends on:** Phase 3 (workout_templates, workout_assignments schema exists)
+**Depends on:** Phase 1 (member lifecycle, status tracking)
 
-Goal: Bridge trainer workflow with member experience — trainers assign workout plans, members consume them.
+Goal: Allow gym owners to pause/freeze a member's membership, auto-extending the end date for the duration of the pause. Configurable per plan to limit abuse.
 
 Deliverables:
-- [ ] Trainer view: list of assigned members with their goals
-- [ ] Trainer UI: assign workout template to member (writes to workout_assignments)
-- [ ] Member view: "My Workout" screen showing assigned plan + exercises
-- [ ] Owner view: assignment list per trainer and member
-- [ ] Workout assignment history (when was last plan changed)
+- [ ] New member status: `Paused` (alongside Active, Expiring Soon, Expired, Suspended, Pending)
+- [ ] Pause action on member profile (owner only): set pause start date, expected return date, reason
+- [ ] `membership_pauses` Firestore collection: pause records per member (start, end, reason, paused_by, gymId)
+- [ ] Auto-extend member `endDate` by the pause duration when pause is created
+- [ ] Resume membership: owner marks return date; `endDate` re-adjusted if member returned early
+- [ ] Per-plan configuration: `max_pauses_per_cycle` (default: 2) and `max_pause_days` (default: 30)
+- [ ] Pause history log on member profile: all past pauses with dates and reason
+- [ ] Dashboard KPI: Paused members count
+- [ ] Renewal queue: paused members excluded from expiring-soon list while paused
+- [ ] Firestore rules: only owner can write to `membership_pauses`
 
 ---
 
-## 🔲 Phase 9 — Analytics & Insights
+## 🔲 Phase 10 — Member Workout Logging & Exercise Library
+**Status:** NOT STARTED
+**Priority:** HIGH
+**Depends on:** Phase 7 (exercise concepts established)
+
+Goal: Members self-log their workout sessions — what exercises they did, what weight, sets, and reps. Backed by a built-in + owner-customizable exercise library.
+
+Deliverables:
+- [ ] **Exercise Library** (`exercise_library` collection):
+  - Built-in seed of ~80 common exercises (e.g., Bench Press, Squat, Deadlift, Pull-up, Plank, Running) categorized by muscle group and equipment type
+  - Owner can add custom exercises for their gym (name, category, equipment)
+  - Owner can hide/deactivate exercises they don't want members to see
+- [ ] **Member Workout Log** (`workout_logs` + `workout_log_entries` collections):
+  - Member opens "Log Workout" from their dashboard
+  - Selects date (defaults to today), adds optional session notes
+  - Adds exercises by picking from the library (searchable) or typing a custom name
+  - Per exercise entry: sets × reps × weight (for strength) or duration (for cardio)
+  - Save session; view full session history in "My Workouts" screen
+- [ ] **Personal Record (PR) tracking**: auto-detect highest weight × reps per exercise; show badge on history
+- [ ] **Owner view**: can view any member's workout log history from the member profile
+- [ ] Exercise library management screen under Settings or Workouts (owner)
+- [ ] Firestore rules: members can write only their own logs; owner can read all
+
+---
+
+## 🔲 Phase 11 — Analytics & Insights
 **Status:** NOT STARTED
 **Priority:** MEDIUM
 **Depends on:** Phase 4
@@ -142,7 +190,7 @@ Deliverables:
 
 ---
 
-## 🔲 Phase 10 — Multi-Branch Support
+## 🔲 Phase 12 — Multi-Branch Support
 **Status:** NOT STARTED
 **Priority:** MEDIUM
 **Depends on:** Phase 5 (Firestore auth architecture)
@@ -158,7 +206,7 @@ Deliverables:
 
 ---
 
-## 🔲 Phase 11 — Payment Gateway Integration
+## 🔲 Phase 13 — Payment Gateway Integration
 **Status:** NOT STARTED
 **Priority:** MEDIUM
 **Depends on:** Phase 4 (payment model established)
@@ -174,7 +222,7 @@ Deliverables:
 
 ---
 
-## 🔲 Phase 12 — Advanced Operations
+## 🔲 Phase 14 — Advanced Operations
 **Status:** BACKLOG
 **Priority:** LOW
 
