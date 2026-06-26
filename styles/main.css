@@ -671,6 +671,9 @@ label {
 }
 
 label.wide { grid-column: 1 / -1; }
+.form-section-heading { grid-column: 1 / -1; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-muted); padding-top: 8px; border-top: 1px solid var(--border); margin-top: 4px; }
+.optional-tag { font-weight: 400; text-transform: none; letter-spacing: 0; opacity: 0.7; }
+input[readonly] { background: var(--surface-alt, var(--surface)); cursor: default; }
 
 input, select, textarea {
   width: 100%;

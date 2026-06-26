@@ -1,5 +1,12 @@
 import { addDays, byName, collections, confirmDialog, dateLabel, emptyState, escapeHtml, findName, formData, memberStatus, nameCell, optionList, pageHeader, statusClass, today, withButtonLoading } from "./utils.js";
 
+function calcBmi(weightKg, heightCm) {
+  const w = parseFloat(weightKg);
+  const h = parseFloat(heightCm) / 100;
+  if (!w || !h || h <= 0) return "";
+  return (w / (h * h)).toFixed(1);
+}
+
 export const membersModule = {
   render({ data }) {
     const members = [...(data.members || [])].sort(byName);
@@ -48,6 +55,13 @@ export const membersModule = {
             </label>
             <label class="wide">Address<textarea name="address" rows="2"></textarea></label>
             <label class="wide">Emergency contact<input name="emergencyContact" maxlength="120" /></label>
+            <div class="form-section-heading">Initial Measurements <span class="optional-tag">(optional)</span></div>
+            <label>Weight kg<input name="initWeight" type="number" min="0" step="0.1" /></label>
+            <label>Height cm<input name="initHeight" type="number" min="0" step="0.1" /></label>
+            <label>BMI<input name="initBmi" type="number" step="0.1" readonly tabindex="-1" /></label>
+            <label>Body fat %<input name="initBodyFat" type="number" min="0" step="0.1" /></label>
+            <label>Waist cm<input name="initWaist" type="number" min="0" step="0.1" /></label>
+            <label>Chest cm<input name="initChest" type="number" min="0" step="0.1" /></label>
           </div>
           <div class="button-row">
             <button class="primary-button" type="submit">Save member</button>
@@ -115,6 +129,12 @@ export const membersModule = {
       if (plan) form.endDate.value = addDays(form.startDate.value, plan.durationDays);
     });
 
+    function updateBmi() {
+      form.initBmi.value = calcBmi(form.initWeight.value, form.initHeight.value);
+    }
+    form.initWeight?.addEventListener("input", updateBmi);
+    form.initHeight?.addEventListener("input", updateBmi);
+
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       const payload = formData(form);
@@ -122,9 +142,32 @@ export const membersModule = {
         context.toast("End date can't be before the start date.");
         return;
       }
+      const isNew = !payload.id;
+      const measurements = {
+        weight:  payload.initWeight  || "",
+        bmi:     payload.initBmi     || "",
+        bodyFat: payload.initBodyFat || "",
+        waist:   payload.initWaist   || "",
+        chest:   payload.initChest   || ""
+      };
+      const hasMeasurements = Object.values(measurements).some((v) => v !== "");
       payload.status = payload.status === "Suspended" ? "Suspended" : memberStatus(payload);
       await withButtonLoading(form.querySelector("[type='submit']"), async () => {
         const saved = await context.services.data.save(collections.members, payload);
+        if (isNew && hasMeasurements) {
+          const progressRecord = {
+            memberId: saved.id,
+            date:    payload.joinDate || today(),
+            weight:  measurements.weight,
+            bmi:     measurements.bmi,
+            bodyFat: measurements.bodyFat,
+            waist:   measurements.waist,
+            chest:   measurements.chest,
+            notes:   "Initial admission measurement"
+          };
+          const savedProgress = await context.services.data.save(collections.progress, progressRecord);
+          context.applyChange(collections.progress, savedProgress);
+        }
         context.toast(payload.id ? "Member updated." : "Member added.");
         form.reset();
         form.joinDate.value = today();
@@ -142,6 +185,7 @@ export const membersModule = {
         Object.entries(member).forEach(([key, value]) => {
           if (form.elements[key]) form.elements[key].value = value || "";
         });
+        updateBmi();
         root.querySelector(".panel-heading h2").textContent = "Edit Member";
         form.scrollIntoView({ behavior: "smooth", block: "start" });
       });
