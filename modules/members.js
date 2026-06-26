@@ -10,10 +10,12 @@ function calcBmi(weightKg, heightCm) {
 function bmiCategory(bmi) {
   const v = parseFloat(bmi);
   if (!v) return null;
-  if (v < 18.5) return { label: "Underweight", color: "var(--warning, #d97706)" };
-  if (v < 25)   return { label: "Healthy",     color: "var(--success, #16a34a)" };
-  if (v < 30)   return { label: "Overweight",  color: "var(--warning, #d97706)" };
-                return { label: "Obese",        color: "var(--danger,  #dc2626)" };
+  if (v < 18.5) return { label: "Underweight",    color: "var(--warning, #d97706)" };
+  if (v < 25)   return { label: "Healthy",         color: "var(--success, #16a34a)" };
+  if (v < 30)   return { label: "Overweight",      color: "var(--warning, #d97706)" };
+  if (v < 35)   return { label: "Obese Class 1",   color: "var(--danger,  #dc2626)" };
+  if (v < 40)   return { label: "Obese Class 2",   color: "var(--danger,  #b91c1c)" };
+                return { label: "Obese Class 3",   color: "var(--danger,  #7f1d1d)" };
 }
 
 export const membersModule = {
@@ -71,6 +73,18 @@ export const membersModule = {
             <label>Body fat %<input name="initBodyFat" type="number" min="0" step="0.1" /></label>
             <label>Waist cm<input name="initWaist" type="number" min="0" step="0.1" /></label>
             <label>Chest cm<input name="initChest" type="number" min="0" step="0.1" /></label>
+            <label class="wide">Gym goal
+              <select name="gymGoal">
+                <option value="">Not specified</option>
+                <option>Weight Loss</option>
+                <option>Muscle Gain</option>
+                <option>General Fitness</option>
+                <option>Endurance / Cardio</option>
+                <option>Body Toning</option>
+                <option>Flexibility / Mobility</option>
+                <option>Rehabilitation</option>
+              </select>
+            </label>
           </div>
           <div class="button-row">
             <button class="primary-button" type="submit">Save member</button>
