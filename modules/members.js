@@ -7,15 +7,19 @@ function calcBmi(weightKg, heightCm) {
   return (w / (h * h)).toFixed(1);
 }
 
-function bmiCategory(bmi) {
+function bmiCategory(bmi, gender) {
   const v = parseFloat(bmi);
   if (!v) return null;
-  if (v < 18.5) return { label: "Underweight",    color: "var(--warning, #d97706)" };
-  if (v < 25)   return { label: "Healthy",         color: "var(--success, #16a34a)" };
-  if (v < 30)   return { label: "Overweight",      color: "var(--warning, #d97706)" };
-  if (v < 35)   return { label: "Obese Class 1",   color: "var(--danger,  #dc2626)" };
-  if (v < 40)   return { label: "Obese Class 2",   color: "var(--danger,  #b91c1c)" };
-                return { label: "Obese Class 3",   color: "var(--danger,  #7f1d1d)" };
+  // WHO Asian / Indian consensus thresholds (WHO Expert Consultation 2004 + ICMR guidelines)
+  // For Indians, overweight risk starts at 23 (vs 25 globally) and obese at 25 (vs 30 globally).
+  // Females carry ~6-8% more body fat at the same BMI, so healthy ceiling is 22.0 vs 22.9 for males.
+  const healthyMax = (gender === "Female") ? 22.0 : 22.9;
+  if (v < 18.5)        return { label: "Underweight",   color: "var(--warning, #d97706)" };
+  if (v <= healthyMax) return { label: "Healthy",        color: "var(--success, #16a34a)" };
+  if (v < 25)          return { label: "Overweight",     color: "var(--warning, #f59e0b)" };
+  if (v < 30)          return { label: "Obese Class 1",  color: "var(--danger,  #dc2626)" };
+  if (v < 35)          return { label: "Obese Class 2",  color: "var(--danger,  #b91c1c)" };
+                       return { label: "Obese Class 3",  color: "var(--danger,  #7f1d1d)" };
 }
 
 export const membersModule = {
@@ -156,7 +160,7 @@ export const membersModule = {
     function updateBmi() {
       const val = calcBmi(form.initWeight.value, form.initHeight.value);
       form.initBmi.value = val;
-      const cat = bmiCategory(val);
+      const cat = bmiCategory(val, form.gender.value);
       if (bmiLabel) {
         bmiLabel.textContent = cat ? cat.label : "";
         bmiLabel.style.color = cat ? cat.color : "";
@@ -164,6 +168,7 @@ export const membersModule = {
     }
     form.initWeight?.addEventListener("input", updateBmi);
     form.initHeight?.addEventListener("input", updateBmi);
+    form.gender?.addEventListener("change", updateBmi);
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
