@@ -7,6 +7,15 @@ function calcBmi(weightKg, heightCm) {
   return (w / (h * h)).toFixed(1);
 }
 
+function bmiCategory(bmi) {
+  const v = parseFloat(bmi);
+  if (!v) return null;
+  if (v < 18.5) return { label: "Underweight", color: "var(--warning, #d97706)" };
+  if (v < 25)   return { label: "Healthy",     color: "var(--success, #16a34a)" };
+  if (v < 30)   return { label: "Overweight",  color: "var(--warning, #d97706)" };
+                return { label: "Obese",        color: "var(--danger,  #dc2626)" };
+}
+
 export const membersModule = {
   render({ data }) {
     const members = [...(data.members || [])].sort(byName);
@@ -58,7 +67,7 @@ export const membersModule = {
             <div class="form-section-heading">Initial Measurements <span class="optional-tag">(optional)</span></div>
             <label>Weight kg<input name="initWeight" type="number" min="0" step="0.1" /></label>
             <label>Height cm<input name="initHeight" type="number" min="0" step="0.1" /></label>
-            <label>BMI<input name="initBmi" type="number" step="0.1" readonly tabindex="-1" /></label>
+            <label>BMI<input name="initBmi" type="number" step="0.1" readonly tabindex="-1" /><span data-bmi-label class="bmi-label"></span></label>
             <label>Body fat %<input name="initBodyFat" type="number" min="0" step="0.1" /></label>
             <label>Waist cm<input name="initWaist" type="number" min="0" step="0.1" /></label>
             <label>Chest cm<input name="initChest" type="number" min="0" step="0.1" /></label>
@@ -129,8 +138,15 @@ export const membersModule = {
       if (plan) form.endDate.value = addDays(form.startDate.value, plan.durationDays);
     });
 
+    const bmiLabel = form.querySelector("[data-bmi-label]");
     function updateBmi() {
-      form.initBmi.value = calcBmi(form.initWeight.value, form.initHeight.value);
+      const val = calcBmi(form.initWeight.value, form.initHeight.value);
+      form.initBmi.value = val;
+      const cat = bmiCategory(val);
+      if (bmiLabel) {
+        bmiLabel.textContent = cat ? cat.label : "";
+        bmiLabel.style.color = cat ? cat.color : "";
+      }
     }
     form.initWeight?.addEventListener("input", updateBmi);
     form.initHeight?.addEventListener("input", updateBmi);
