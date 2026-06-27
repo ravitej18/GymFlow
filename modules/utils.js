@@ -9,7 +9,8 @@ export const collections = {
   workoutSessions: "workout_sessions",
   progress: "progress_records",
   reminders: "reminders",
-  trainerAttendance: "trainer_attendance"
+  trainerAttendance: "trainer_attendance",
+  membershipPauses: "membership_pauses"
 };
 
 export function escapeHtml(value = "") {
@@ -55,10 +56,11 @@ export function daysUntil(value) {
 
 export function memberStatus(member) {
   // Stored statuses that override date-derived status.
-  if (member.status === "Pending") return "Pending";
+  if (member.status === "Pending")   return "Pending";
+  if (member.status === "Paused")    return "Paused";
   if (member.status === "Suspended") return "Suspended";
   const remaining = daysUntil(member.endDate);
-  if (remaining < 0) return "Expired";
+  if (remaining < 0)   return "Expired";
   if (remaining <= 15) return "Expiring Soon";
   return "Active";
 }

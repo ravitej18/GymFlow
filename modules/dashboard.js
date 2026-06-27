@@ -19,6 +19,7 @@ export const dashboardModule = {
     const active = members.filter((member) => memberStatus(member) === "Active").length;
     const expiring = members.filter((member) => daysUntil(member.endDate) >= 0 && daysUntil(member.endDate) <= 15).length;
     const expired = members.filter((member) => memberStatus(member) === "Expired").length;
+    const paused  = members.filter((member) => memberStatus(member) === "Paused").length;
     const revenueToday = payments.filter((payment) => payment.date === today).reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
     const revenueMonth = payments.filter((payment) => String(payment.date || "").startsWith(month)).reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
     const attendanceToday = attendance.filter((record) => record.date === today).length;
@@ -35,6 +36,7 @@ export const dashboardModule = {
         ${metric("Active Members", active)}
         ${metric("Expiring Soon", expiring)}
         ${metric("Expired", expired)}
+        ${metric("Paused Members", paused)}
         ${metric("Revenue Today", money(revenueToday, currency))}
         ${metric("Revenue Month", money(revenueMonth, currency))}
         ${metric("Attendance Today", attendanceToday)}

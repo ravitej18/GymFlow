@@ -7,7 +7,7 @@ export const renewalsModule = {
     const currency = settings?.currency || "INR";
     const watched = members
       .map((member) => ({ ...member, remaining: daysUntil(member.endDate), computedStatus: memberStatus(member) }))
-      .filter((member) => member.remaining <= 30 || member.computedStatus === "Expired")
+      .filter((member) => member.computedStatus !== "Paused" && (member.remaining <= 30 || member.computedStatus === "Expired"))
       .sort((a, b) => a.remaining - b.remaining);
 
     return `

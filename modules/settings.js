@@ -34,6 +34,23 @@ export const settingsModule = {
           }
         </section>
         <section class="panel stack">
+          <div class="panel-heading"><h2>Membership Pause Limits</h2></div>
+          <p class="panel-hint">Global defaults applied when an owner pauses a member's membership.</p>
+          <form id="pause-limits-form">
+            <div class="form-grid">
+              <label>Max pauses per year
+                <input name="maxPausesPerYear" type="number" min="1" max="12"
+                       value="${escapeHtml(String(settings?.maxPausesPerYear ?? 2))}" required />
+              </label>
+              <label>Max pause days (per pause)
+                <input name="maxPauseDays" type="number" min="1" max="365"
+                       value="${escapeHtml(String(settings?.maxPauseDays ?? 30))}" required />
+              </label>
+            </div>
+            <button class="primary-button" type="submit">Save pause limits</button>
+          </form>
+        </section>
+        <section class="panel stack">
           <div class="panel-heading"><h2>Backup &amp; Restore</h2></div>
           <p class="panel-hint">Download a full copy of your gym data, or restore from a previous export.</p>
           <div class="button-row">
@@ -83,6 +100,17 @@ export const settingsModule = {
       await context.services.data.importData(payload);
       context.toast("Import complete.");
       await context.refresh();
+    });
+
+    const pauseLimitsForm = root.querySelector("#pause-limits-form");
+    pauseLimitsForm?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const payload = formData(pauseLimitsForm);
+      payload.maxPausesPerYear = Number(payload.maxPausesPerYear);
+      payload.maxPauseDays     = Number(payload.maxPauseDays);
+      await context.services.data.saveSettings(payload);
+      context.toast("Pause limits saved.");
+      await context.refreshView();
     });
   }
 };

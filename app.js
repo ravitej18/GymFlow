@@ -89,7 +89,8 @@ const collectionNames = [
   "workout_sessions",
   "progress_records",
   "reminders",
-  "trainer_attendance"
+  "trainer_attendance",
+  "membership_pauses"
 ];
 
 const state = {

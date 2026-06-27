@@ -180,6 +180,12 @@ service cloud.firestore {
 
     // Everything else (plans, payments, progress, workouts, reminders):
     // same-gym read; owner-only writes.
+    match /membership_pauses/{docId} {
+      allow read: if sameGym();
+      allow create, update: if owner() && incomingSameGym();
+      allow delete: if owner() && sameGym();
+    }
+
     match /{collection}/{docId} {
       allow read: if sameGym();
       allow create, update: if owner() && incomingSameGym();
