@@ -158,39 +158,43 @@ Plans:
 
 **Goal**: Significantly upgrade the member-facing experience so members actively use the app rather than just being managed through it.
 **Depends on**: Phase 6, Phase 7
-**Status**: Not started
+**Status**: In Progress
 **Success Criteria** (what must be TRUE):
 
-  1. Member can self-edit profile (name, mobile, address)
-  2. Member can view own payment receipts
-  3. Member can view assigned trainer details
-  4. Member can view assigned workout plan (Phase 7 data)
-  5. PWA push notification opt-in works for expiry reminders
-  6. In-app notification badge appears on dashboard
+  1. Admission body measurements (weight, height, BMI, body fat, waist, chest) are captured at member signup
+  2. Saving a new member with measurements auto-creates an initial progress record seeding the progress chart from Day 1
+  3. Editing an existing member pre-fills and updates measurements without creating duplicate progress records
+  4. Member can self-edit profile (name, mobile, address)
+  5. Member can view own payment receipts
+  6. Member can view assigned trainer details
+  7. Member can view assigned workout plan (Phase 7 data)
+  8. PWA push notification opt-in works for expiry reminders
+  9. In-app notification badge appears on dashboard
 
 Plans:
 
-- [ ] 08-01: TBD
+- [ ] 08-01-PLAN.md — Admission body measurements: form fields + BMI auto-calc + auto-create initial progress record
 
 ### Phase 9: Membership Pause & Freeze
 
 **Goal**: Allow gym owners to pause/freeze a member's membership, auto-extending the end date for the duration of the pause.
 **Depends on**: Phase 1
-**Status**: Not started
+**Status**: Planned
 **Success Criteria** (what must be TRUE):
 
   1. New Paused status appears in member lifecycle
-  2. Owner can pause a membership with start date, return date, and reason
+  2. Owner can pause a membership with start date, return date, and reason (inline on Members page)
   3. membership_pauses Firestore collection stores pause history
-  4. Member endDate auto-extends by pause duration
-  5. Owner can resume and re-adjust endDate if member returns early
-  6. Per-plan max_pauses_per_cycle and max_pause_days limits enforced
+  4. Member endDate auto-extends by pause duration (returnDate − pauseStart days)
+  5. Owner can resume early — unused frozen days are refunded from endDate
+  6. Global pause limits (maxPausesPerYear, maxPauseDays) configurable in Settings; enforced on save
   7. Dashboard KPI shows paused members count
   8. Renewal queue excludes paused members while paused
 
 Plans:
 
-- [ ] 09-01: TBD
+- [ ] 09-01-PLAN.md — Data infrastructure: membership_pauses collection, memberStatus Paused, Firestore rules, Settings limits panel, Dashboard KPI, Renewals queue filter
+- [ ] 09-02-PLAN.md — Pause/Resume UI: inline pause form on Members page, pause/resume buttons in row actions, validation against limits, endDate extension + early-return refund
 
 ### Phase 10: Member Workout Logging & Exercise Library
 
