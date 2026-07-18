@@ -13,6 +13,9 @@ export const myWorkoutModule = {
     const templates = context.data.workout_templates || [];
     const sessions = context.data.workout_sessions || [];
     const assignments = context.data.workout_assignments || [];
+    const basicTemplates = templates
+      .filter((template) => template.visibility === "basic" && template.status !== "archived")
+      .sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")));
 
     // Today's session for this member
     const todaySession = sessions.find(s => s.memberId === me.id && s.date === today());
@@ -79,12 +82,37 @@ export const myWorkoutModule = {
       </section>
     `;
 
+    const basicPanel = `
+      <section class="panel">
+        <div class="panel-heading">
+          <h2>Basic Workouts</h2>
+          <span>${basicTemplates.length} modules</span>
+        </div>
+        ${
+          basicTemplates.length
+            ? `<div class="card-grid">${basicTemplates.map(basicCard).join("")}</div>`
+            : emptyState("No basic workouts yet", "Basic workout modules from your gym will appear here.")
+        }
+      </section>
+    `;
+
     return `
       ${pageHeader("My Workout")}
       <div class="work-grid">
         ${todayPanel}
         ${historyPanel}
       </div>
+      ${basicPanel}
     `;
   }
 };
+
+function basicCard(template) {
+  return `
+    <article class="item-card">
+      <div><strong>${escapeHtml(template.name)}</strong><span>${escapeHtml(template.goal || "General")}</span></div>
+      <pre>${escapeHtml(template.exercises || "No exercises listed")}</pre>
+      ${template.notes ? `<small>${escapeHtml(template.notes)}</small>` : ""}
+    </article>
+  `;
+}

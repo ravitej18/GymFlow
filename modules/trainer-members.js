@@ -1,18 +1,19 @@
 import { collections, dateLabel, emptyState, escapeHtml, findName, formData, optionList, pageHeader, today, withButtonLoading } from "./utils.js";
+import { canUseWorkoutTemplate } from "./workouts.js";
 
 export const trainerMembersModule = {
   render(context) {
     const me = context.myTrainer;
     if (!me) {
       return `
-        ${pageHeader("My Members")}
-        ${emptyState("Profile being set up", "Once your gym finalises your trainer profile your members will appear here.")}
+        ${pageHeader("My Clients")}
+        ${emptyState("Profile being set up", "Once your gym finalises your trainer profile your clients will appear here.")}
       `;
     }
 
     const myMembers = (context.data.members || []).filter(m => m.assignedTrainer === me.id);
     const assignments = context.data.workout_assignments || [];
-    const templates = context.data.workout_templates || [];
+    const templates = (context.data.workout_templates || []).filter((template) => canUseWorkoutTemplate(template, context));
 
     function currentTemplateName(member) {
       const memberAssignments = assignments.filter(a => a.memberId === member.id);
@@ -22,21 +23,21 @@ export const trainerMembersModule = {
     }
 
     return `
-      ${pageHeader("My Members")}
+      ${pageHeader("My Clients")}
       <div class="work-grid">
         <form class="panel stack" id="session-form">
           <div class="panel-heading"><h2>Write Today's Session</h2></div>
           <div class="form-grid">
-            <label class="wide">Member
+            <label class="wide">Client
               <select name="memberId" required>
-                <option value="">Select member…</option>
+                <option value="">Select client...</option>
                 ${optionList(myMembers, "fullName")}
               </select>
             </label>
             <label>Date
               <input type="date" name="date" value="${escapeHtml(today())}" />
             </label>
-            <label>Base Template
+            <label>Base Module
               <select name="templateId">
                 <option value="">None</option>
                 ${optionList(templates, "name")}
@@ -53,13 +54,13 @@ export const trainerMembersModule = {
         </form>
         <section class="panel">
           <div class="panel-heading">
-            <h2>My Members</h2>
-            <span>${myMembers.length} members</span>
+            <h2>Assigned Clients</h2>
+            <span>${myMembers.length} clients</span>
           </div>
           ${
             myMembers.length
               ? `<div class="card-grid">${myMembers.map(member => memberCard(member, currentTemplateName(member), templates)).join("")}</div>`
-              : emptyState("No members assigned", "Members are assigned to you from their member profile.")
+              : emptyState("No clients assigned", "Clients are assigned to you from their member profile.")
           }
         </section>
       </div>
@@ -104,7 +105,7 @@ export const trainerMembersModule = {
             templateId,
             assignedAt: today()
           });
-          context.toast("Template assigned.");
+          context.toast("Module assigned.");
           context.applyChange(collections.assignments, saved);
         } finally {
           select.disabled = false;
@@ -124,7 +125,7 @@ function memberCard(member, templateName, templates) {
       <p>${escapeHtml(templateName)}</p>
       <div class="card-footer">
         <select data-assign-template="${escapeHtml(member.id)}">
-          <option value="">Assign template…</option>
+          <option value="">Assign module...</option>
           ${optionList(templates, "name")}
         </select>
       </div>

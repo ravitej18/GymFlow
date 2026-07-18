@@ -28,7 +28,8 @@ function makeData() {
     workout_assignments: [],
     workout_sessions: [],
     progress_records: [],
-    reminders: []
+    reminders: [],
+    membership_pauses: []
   };
 }
 
@@ -51,6 +52,17 @@ const memberContext = {
   myMemberId: "m1"
 };
 memberContext.data.members = [memberContext.myMember];
+memberContext.data.workout_templates = [
+  {
+    id: "basic-1",
+    name: "Basic Strength",
+    goal: "Strength",
+    exercises: "Squat - 3 x 10",
+    notes: "Move with control.",
+    visibility: "basic",
+    status: "active"
+  }
+];
 
 const ownerModules = [
   dashboardModule, membersModule, membershipsModule, paymentsModule, renewalsModule,
@@ -71,8 +83,40 @@ const trainerContext = {
   myTrainerId: "t1"
 };
 trainerContext.data.trainers = [trainerContext.myTrainer];
+trainerContext.data.workout_templates = [
+  {
+    id: "trainer-private",
+    name: "Trainer Private Module",
+    goal: "Muscle Gain",
+    exercises: "Bench press - 3 x 10",
+    visibility: "private",
+    status: "active",
+    createdByRole: "trainer",
+    createdByUid: "trainer-uid",
+    trainerId: "t1"
+  },
+  {
+    id: "other-trainer-private",
+    name: "Other Trainer Private Module",
+    goal: "Strength",
+    exercises: "Deadlift - 3 x 5",
+    visibility: "private",
+    status: "active",
+    createdByRole: "trainer",
+    createdByUid: "other-trainer-uid",
+    trainerId: "t2"
+  },
+  {
+    id: "basic-1",
+    name: "Basic Strength",
+    goal: "Strength",
+    exercises: "Squat - 3 x 10",
+    visibility: "basic",
+    status: "active"
+  }
+];
 
-const trainerModules = [dashboardModule, trainerCheckinModule, trainerMembersModule];
+const trainerModules = [dashboardModule, trainerCheckinModule, trainerMembersModule, workoutsModule];
 
 function checkRender(module, context, label) {
   const html = module.render(context);
@@ -84,6 +128,19 @@ function checkRender(module, context, label) {
 for (const module of ownerModules) checkRender(module, ownerContext, "owner");
 for (const module of memberModules) checkRender(module, memberContext, "member");
 for (const module of trainerModules) checkRender(module, trainerContext, "trainer");
+
+const trainerMembersHtml = trainerMembersModule.render(trainerContext);
+if (!trainerMembersHtml.includes("My Clients") || trainerMembersHtml.includes("My Members")) {
+  throw new Error("Trainer clients screen did not use the updated client wording.");
+}
+if (!trainerMembersHtml.includes("Trainer Private Module") || trainerMembersHtml.includes("Other Trainer Private Module")) {
+  throw new Error("Trainer assignment module filtering is incorrect.");
+}
+
+const memberWorkoutHtml = myWorkoutModule.render(memberContext);
+if (!memberWorkoutHtml.includes("Basic Workouts") || !memberWorkoutHtml.includes("Basic Strength")) {
+  throw new Error("Member workout screen did not render Basic workout modules.");
+}
 
 // No-roster-doc yet (status setup path) for both member and trainer.
 const pendingMember = { ...memberContext, myMember: null, myMemberId: null, data: makeData() };
