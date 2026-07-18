@@ -1,4 +1,5 @@
 import { dateLabel, emptyState, escapeHtml, findName, pageHeader, today } from "./utils.js";
+import { renderTemplateExercises } from "./workouts.js";
 
 export const myWorkoutModule = {
   render(context) {
@@ -47,7 +48,7 @@ export const myWorkoutModule = {
           <div class="panel-heading"><h2>Today's Workout</h2></div>
           <p><strong>${escapeHtml(tmplName)}</strong></p>
           <small>No session written for today — showing your assigned plan.</small>
-          <pre>${escapeHtml(tmpl?.exercises || "No exercises listed")}</pre>
+          ${renderTemplateExercises(tmpl)}
         </section>
       `;
     } else {
@@ -82,6 +83,8 @@ export const myWorkoutModule = {
       </section>
     `;
 
+    const categories = unique(basicTemplates.map((template) => template.category || "General"));
+    const difficulties = unique(basicTemplates.map((template) => template.difficulty).filter(Boolean));
     const basicPanel = `
       <section class="panel">
         <div class="panel-heading">
@@ -90,7 +93,29 @@ export const myWorkoutModule = {
         </div>
         ${
           basicTemplates.length
-            ? `<div class="card-grid">${basicTemplates.map(basicCard).join("")}</div>`
+            ? `
+              <div class="filter-bar">
+                <label>Search
+                  <span class="search-field">
+                    <span class="material-symbols-outlined">search</span>
+                    <input type="search" data-basic-filter="search" placeholder="Name, goal, exercises" />
+                  </span>
+                </label>
+                <label>Category
+                  <select data-basic-filter="category">
+                    <option value="">All categories</option>
+                    ${categories.map((category) => `<option>${escapeHtml(category)}</option>`).join("")}
+                  </select>
+                </label>
+                <label>Difficulty
+                  <select data-basic-filter="difficulty">
+                    <option value="">All levels</option>
+                    ${difficulties.map((difficulty) => `<option>${escapeHtml(difficulty)}</option>`).join("")}
+                  </select>
+                </label>
+              </div>
+              <div class="card-grid" data-basic-list>${basicTemplates.map(basicCard).join("")}</div>
+            `
             : emptyState("No basic workouts yet", "Basic workout modules from your gym will appear here.")
         }
       </section>
@@ -104,15 +129,64 @@ export const myWorkoutModule = {
       </div>
       ${basicPanel}
     `;
+  },
+  bind(root) {
+    bindBasicFilters(root);
   }
 };
 
 function basicCard(template) {
+  const meta = [template.category || "General", template.difficulty, template.equipment, template.durationMinutes ? `${template.durationMinutes} min` : ""]
+    .filter(Boolean)
+    .join(" / ");
+  const search = [template.name, template.goal, template.category, template.difficulty, template.equipment, template.exercises, template.notes]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
   return `
-    <article class="item-card">
+    <article class="item-card"
+      data-basic-card
+      data-search="${escapeHtml(search)}"
+      data-category="${escapeHtml(template.category || "General")}"
+      data-difficulty="${escapeHtml(template.difficulty || "")}">
       <div><strong>${escapeHtml(template.name)}</strong><span>${escapeHtml(template.goal || "General")}</span></div>
-      <pre>${escapeHtml(template.exercises || "No exercises listed")}</pre>
+      ${meta ? `<small>${escapeHtml(meta)}</small>` : ""}
+      ${renderTemplateExercises(template)}
       ${template.notes ? `<small>${escapeHtml(template.notes)}</small>` : ""}
     </article>
   `;
+}
+
+function bindBasicFilters(root) {
+  const list = root.querySelector("[data-basic-list]");
+  if (!list) return;
+  const filters = {
+    search: root.querySelector("[data-basic-filter='search']"),
+    category: root.querySelector("[data-basic-filter='category']"),
+    difficulty: root.querySelector("[data-basic-filter='difficulty']")
+  };
+  const cards = Array.from(list.querySelectorAll("[data-basic-card]"));
+
+  function apply() {
+    const term = (filters.search?.value || "").trim().toLowerCase();
+    const category = filters.category?.value || "";
+    const difficulty = filters.difficulty?.value || "";
+    cards.forEach((card) => {
+      const ok =
+        (!term || card.dataset.search.includes(term)) &&
+        (!category || card.dataset.category === category) &&
+        (!difficulty || card.dataset.difficulty === difficulty);
+      card.classList.toggle("hidden", !ok);
+    });
+  }
+
+  Object.values(filters).forEach((filter) => {
+    filter?.addEventListener("input", apply);
+    filter?.addEventListener("change", apply);
+  });
+}
+
+function unique(values) {
+  return Array.from(new Set(values.filter(Boolean))).sort((a, b) => String(a).localeCompare(String(b)));
 }

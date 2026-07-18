@@ -41,6 +41,21 @@ const ownerContext = {
   myMember: null,
   myMemberId: null
 };
+ownerContext.data.workout_templates = [
+  {
+    id: "trainer-basic",
+    name: "Trainer Basic Module",
+    goal: "Mobility",
+    category: "Mobility",
+    difficulty: "Beginner",
+    exercisesStructured: [{ name: "Cat Cow", sets: "2", reps: "10", rest: "30 sec", notes: "Slow control" }],
+    visibility: "basic",
+    status: "active",
+    createdByRole: "trainer",
+    createdByUid: "trainer-uid",
+    trainerId: "t1"
+  }
+];
 
 // A member with no roster doc (membership-being-set-up path) and with one.
 const memberContext = {
@@ -57,7 +72,12 @@ memberContext.data.workout_templates = [
     id: "basic-1",
     name: "Basic Strength",
     goal: "Strength",
+    category: "Strength",
+    difficulty: "Beginner",
+    equipment: "Bodyweight",
+    durationMinutes: 30,
     exercises: "Squat - 3 x 10",
+    exercisesStructured: [{ name: "Squat", sets: "3", reps: "10", weight: "Bodyweight", rest: "60 sec" }],
     notes: "Move with control.",
     visibility: "basic",
     status: "active"
@@ -83,12 +103,18 @@ const trainerContext = {
   myTrainerId: "t1"
 };
 trainerContext.data.trainers = [trainerContext.myTrainer];
+trainerContext.data.members = [{ id: "tm1", uid: "trainer-client-uid", fullName: "Trainer Client", assignedTrainer: "t1", status: "Active", endDate: "2099-01-01" }];
 trainerContext.data.workout_templates = [
   {
     id: "trainer-private",
     name: "Trainer Private Module",
     goal: "Muscle Gain",
+    category: "Strength",
+    difficulty: "Intermediate",
+    equipment: "Dumbbells",
+    durationMinutes: 45,
     exercises: "Bench press - 3 x 10",
+    exercisesStructured: [{ name: "Bench press", sets: "3", reps: "10", weight: "60 kg", rest: "90 sec" }],
     visibility: "private",
     status: "active",
     createdByRole: "trainer",
@@ -99,6 +125,8 @@ trainerContext.data.workout_templates = [
     id: "other-trainer-private",
     name: "Other Trainer Private Module",
     goal: "Strength",
+    category: "Strength",
+    difficulty: "Advanced",
     exercises: "Deadlift - 3 x 5",
     visibility: "private",
     status: "active",
@@ -110,7 +138,11 @@ trainerContext.data.workout_templates = [
     id: "basic-1",
     name: "Basic Strength",
     goal: "Strength",
+    category: "Strength",
+    difficulty: "Beginner",
+    durationMinutes: 30,
     exercises: "Squat - 3 x 10",
+    exercisesStructured: [{ name: "Squat", sets: "3", reps: "10", rest: "60 sec" }],
     visibility: "basic",
     status: "active"
   }
@@ -136,10 +168,30 @@ if (!trainerMembersHtml.includes("My Clients") || trainerMembersHtml.includes("M
 if (!trainerMembersHtml.includes("Trainer Private Module") || trainerMembersHtml.includes("Other Trainer Private Module")) {
   throw new Error("Trainer assignment module filtering is incorrect.");
 }
+if (!trainerMembersHtml.includes("Assign Module to Clients") || !trainerMembersHtml.includes("data-card-preview")) {
+  throw new Error("Trainer clients screen did not render bulk assignment and preview UI.");
+}
 
 const memberWorkoutHtml = myWorkoutModule.render(memberContext);
-if (!memberWorkoutHtml.includes("Basic Workouts") || !memberWorkoutHtml.includes("Basic Strength")) {
+if (!memberWorkoutHtml.includes("Basic Workouts") || !memberWorkoutHtml.includes("Basic Strength") || !memberWorkoutHtml.includes("data-basic-filter")) {
   throw new Error("Member workout screen did not render Basic workout modules.");
+}
+
+const trainerWorkoutsHtml = workoutsModule.render(trainerContext);
+if (
+  !trainerWorkoutsHtml.includes("Difficulty") ||
+  !trainerWorkoutsHtml.includes("Duration minutes") ||
+  !trainerWorkoutsHtml.includes("Structured exercises") ||
+  !trainerWorkoutsHtml.includes("Bench press") ||
+  !trainerWorkoutsHtml.includes("data-clone-template") ||
+  trainerWorkoutsHtml.includes("Other Trainer Private Module")
+) {
+  throw new Error("Trainer workouts screen did not render metadata filters, clone action, or private filtering correctly.");
+}
+
+const ownerWorkoutsHtml = workoutsModule.render(ownerContext);
+if (!ownerWorkoutsHtml.includes("Trainer Basic Module") || ownerWorkoutsHtml.includes("data-approve-basic") || !ownerWorkoutsHtml.includes("Cat Cow")) {
+  throw new Error("Owner workouts screen did not render direct Basic modules and structured exercises correctly.");
 }
 
 // No-roster-doc yet (status setup path) for both member and trainer.

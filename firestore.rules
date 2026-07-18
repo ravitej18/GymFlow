@@ -155,6 +155,10 @@ service cloud.firestore {
           && request.resource.data.createdByRole == "trainer"
           && request.resource.data.createdByUid == uid()
           && request.resource.data.gymId == myGymId()
+          && (
+            request.resource.data.visibility == "private"
+            || request.resource.data.visibility == "basic"
+          )
           && exists(/databases/$(database)/documents/trainers/$(request.resource.data.trainerId))
           && get(/databases/$(database)/documents/trainers/$(request.resource.data.trainerId)).data.uid == uid()
         )
@@ -168,6 +172,10 @@ service cloud.firestore {
           && request.resource.data.createdByRole == "trainer"
           && request.resource.data.createdByUid == uid()
           && request.resource.data.trainerId == resource.data.trainerId
+          && (
+            request.resource.data.visibility == "private"
+            || request.resource.data.visibility == "basic"
+          )
           && exists(/databases/$(database)/documents/trainers/$(resource.data.trainerId))
           && get(/databases/$(database)/documents/trainers/$(resource.data.trainerId)).data.uid == uid()
         )
