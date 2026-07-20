@@ -13,9 +13,10 @@ GymFlow is a zero-cost, self-hosted gym management PWA. Phases build out the ful
 - [x] **Phase 5: Auth, Roles & PWA** — Firebase Auth, role-based routing, Firestore rules, PWA + offline
 - [x] **Phase 6: UI Design System & Dark Mode** — Design tokens, dark/light mode, animations, responsive layouts
 - [x] **Phase 7: Trainer-Member Workout Assignment** — Trainers assign plans, author daily sessions; members consume workouts (completed 2026-06-21)
-- [ ] **Phase 8: Member Portal v2** — Member self-edit, receipts, push notifications, trainer details
-- [ ] **Phase 9: Membership Pause & Freeze** — Pause/resume membership, auto-extend end date, per-plan limits
-- [ ] **Phase 10: Trainer Workout Module Library** — Trainers create reusable modules, publish Basic workouts for members, assign later to clients
+- [x] **Phase 8: Member Portal v2** — Member self-edit, receipts, push notifications, trainer details
+- [x] **Phase 9: Membership Pause & Freeze** — Pause/resume membership, auto-extend end date, per-plan limits
+- [x] **Phase 10: Trainer Workout Module Library** — Trainers create reusable modules, publish Basic workouts for members, assign later to clients
+- [ ] **Phase 10.1: Enhanced Member Intake Form & BMI Visual Meter** ⚡ URGENT NEXT — Full real-world intake fields, color-coded BMI horizontal meter, real-time duplicate phone/email detection, WhatsApp notification opt-in
 - [ ] **Phase 11: Member Workout Logging & Exercise Library** — Member self-log sessions, exercise library, PR tracking
 - [ ] **Phase 12: Analytics & Insights** — Revenue trends, member growth, attendance heatmap, forecasting
 - [ ] **Phase 13: Multi-Branch Support** — Branch entity, per-branch scoping, cross-branch dashboard
@@ -159,7 +160,7 @@ Plans:
 
 **Goal**: Significantly upgrade the member-facing experience so members actively use the app rather than just being managed through it.
 **Depends on**: Phase 6, Phase 7
-**Status**: In Progress
+**Status**: Complete
 **Success Criteria** (what must be TRUE):
 
   1. Admission body measurements (weight, height, BMI, body fat, waist, chest) are captured at member signup
@@ -180,7 +181,7 @@ Plans:
 
 **Goal**: Allow gym owners to pause/freeze a member's membership, auto-extending the end date for the duration of the pause.
 **Depends on**: Phase 1
-**Status**: Planned
+**Status**: Complete
 **Success Criteria** (what must be TRUE):
 
   1. New Paused status appears in member lifecycle
@@ -201,7 +202,7 @@ Plans:
 
 **Goal**: Trainers can create workout modules/templates without selecting a client, publish selected modules as Basic workouts visible to members, and assign modules later to assigned clients.
 **Depends on**: Phase 7
-**Status**: Planned
+**Status**: Complete
 **Success Criteria** (what must be TRUE):
 
   1. Trainer sidebar shows Workouts
@@ -214,7 +215,77 @@ Plans:
 
 Plans:
 
-- [ ] 10-01-PLAN.md — Trainer Workout Module Library + Basic Member Library
+- [x] 10-01-PLAN.md — Trainer Workout Module Library + Basic Member Library
+
+### Phase 10.1: Enhanced Member Intake Form & BMI Visual Meter ⚡ URGENT NEXT
+
+**Goal**: Upgrade the member intake form to a complete real-world gym registration form. Replace the plain BMI text label with a color-coded horizontal visual meter, add real-time duplicate detection (mobile and email), and add a WhatsApp notification opt-in field.
+
+**Depends on**: Phase 10 (extends `members.js` and `styles/main.css` only — no new modules)
+**Status**: Not started
+**Priority**: URGENT — execute before Phase 11
+
+**Background**: The current member form captures basics but is missing fields any real gym would collect on paper at the front desk. This phase completes the intake story so the data is rich before Portal and Analytics phases consume it.
+
+**New Fields Being Added**
+
+*Personal & Contact*
+- Blood group (A+, A-, B+, B-, O+, O-, AB+, AB-)
+- Occupation
+- Activity level before joining (Sedentary, Lightly Active, Moderately Active, Very Active)
+- Fitness experience level (Beginner, Intermediate, Advanced)
+- How they heard about the gym / Referred by (Walk-in, Social Media, Friend/Family, Online, Trainer Referral, Other)
+- WhatsApp number (defaults to mobile; separate editable field)
+- WhatsApp notification opt-in (`whatsappOptIn: boolean` checkbox)
+
+*Emergency Contact (split from current single free-text field)*
+- `emergencyName` — contact's full name
+- `emergencyRelationship` — Spouse, Parent, Sibling, Friend, Other
+- `emergencyPhone` — contact's phone number
+
+*Health & Medical (collapsible section)*
+- Medical conditions / health history (textarea)
+- Current medications (textarea)
+- Known allergies (textarea)
+- Physical limitations or injuries (textarea)
+
+*Additional Body Measurements*
+- Hip cm
+- Bicep cm
+- Thigh cm
+
+**BMI Visual Meter**
+- Horizontal segmented color bar replacing the `[data-bmi-label]` text span
+- Zones left-to-right: Underweight (steel-blue) → Healthy (green) → Overweight (yellow) → Obese I (orange) → Obese II (red) → Obese III (dark-red)
+- Animated vertical cursor moves to the calculated BMI position on the bar
+- BMI numeric value shown prominently; category label (e.g., "Healthy") shown in zone color beneath bar
+- Uses WHO Asian/Indian thresholds already coded in `bmiCategory()`
+- Bar hidden until valid weight + height are both entered; appears with smooth fade-in
+
+**Duplicate Detection**
+- On `blur` of mobile field: scan `context.data.members` (already loaded in memory) for same mobile number
+- On `blur` of email field: same scan for matching email
+- If match found on a *different* member: show yellow inline alert beneath the field — "⚠ Member with this mobile already exists: [Name] — click to edit"
+- Alert is informational only; form submission is NOT blocked (allows family accounts sharing a number)
+
+**Success Criteria** (what must be TRUE):
+
+  1. All new fields (blood group, occupation, activity level, fitness experience, referred by, WhatsApp number, WhatsApp opt-in, `emergencyName` / `emergencyRelationship` / `emergencyPhone`, medical conditions, medications, allergies, limitations, hip, bicep, thigh) present in form and saved to Firestore member document
+  2. All new fields pre-fill correctly when editing an existing member
+  3. BMI field is replaced with the visual horizontal color-coded meter; meter is hidden until both weight and height have valid values
+  4. BMI meter indicator updates smoothly every time weight or height changes
+  5. On blur of mobile input, duplicate detection fires; inline named warning appears if a same-mobile member exists (excluding current edit target)
+  6. On blur of email input, duplicate detection fires; inline named warning appears if a same-email member exists (excluding current edit target)
+  7. Duplicate warning is informational — form can still be submitted
+  8. `whatsappOptIn` boolean persists to Firestore on save
+  9. WhatsApp number field auto-populates to the mobile value when mobile is typed; remains editable
+  10. No regressions — existing member data loads, save/edit/delete/pause/resume flows continue working
+
+**Plans**:
+
+- [ ] 10.1-01-PLAN.md — Extended form fields: all new personal/health/measurement fields + data-model additions + emergency contact split + form section restructure
+- [ ] 10.1-02-PLAN.md — BMI visual horizontal meter: CSS gradient bar + JS animated cursor + remove old bmi-label span
+- [ ] 10.1-03-PLAN.md — Duplicate detection (mobile + email, client-side) + WhatsApp number field + WhatsApp opt-in checkbox
 
 ### Phase 11: Member Workout Logging & Exercise Library
 
@@ -313,10 +384,11 @@ Plans:
 | 5 | Auth, Roles & PWA | 3/3 | Complete | — |
 | 6 | UI Design System & Dark Mode | 2/2 | Complete | 2026-06-14 |
 | 7 | Trainer-Member Workout Assignment | 3/3 | Complete   | 2026-06-21 |
-| 8 | Member Portal v2 | 0/1 | Not started | - |
-| 9 | Membership Pause & Freeze | 0/1 | Not started | - |
-| 10 | Trainer Workout Module Library | 0/1 | Not started | - |
-| 11 | Member Workout Logging & Exercise Library | 0/1 | Not started | - |
+| 8 | Member Portal v2 | 1/1 | Complete | — |
+| 9 | Membership Pause & Freeze | 2/2 | Complete | — |
+| 10 | Trainer Workout Module Library | 1/1 | Complete | — |
+| 10.1 | Enhanced Member Intake Form & BMI Visual Meter | 0/3 | Not started | — |
+| 11 | Member Workout Logging & Exercise Library | 0/1 | Not started | — |
 | 12 | Analytics & Insights | 0/1 | Not started | - |
 | 13 | Multi-Branch Support | 0/1 | Not started | - |
 | 14 | Payment Gateway Integration | 0/1 | Not started | - |

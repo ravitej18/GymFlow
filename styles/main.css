@@ -677,6 +677,11 @@ label.wide,
 .form-section-heading { grid-column: 1 / -1; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-muted); padding-top: 8px; border-top: 1px solid var(--border); margin-top: 4px; }
 .optional-tag { font-weight: 400; text-transform: none; letter-spacing: 0; opacity: 0.7; }
 .bmi-label { font-size: 0.75rem; font-weight: 600; margin-top: 3px; display: block; }
+/* Health & Medical collapsible */
+.form-section-details { grid-column: 1 / -1; margin-top: 4px; }
+.form-section-details > summary { display: block; padding: 8px 0; border-top: 1px solid var(--border); }
+.form-section-details > summary::-webkit-details-marker,
+.form-section-details > summary::marker { display: none; content: ""; }
 input[readonly] { background: var(--surface-alt, var(--surface)); cursor: default; }
 
 input, select, textarea {

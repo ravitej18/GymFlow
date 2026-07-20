@@ -69,7 +69,20 @@ export const membersModule = {
               </select>
             </label>
             <label class="wide">Address<textarea name="address" rows="2"></textarea></label>
-            <label class="wide">Emergency contact<input name="emergencyContact" maxlength="120" /></label>
+            <div class="form-section-heading">Emergency Contact <span class="optional-tag">(optional)</span></div>
+            <label>Contact name<input name="emergencyName" maxlength="80" /></label>
+            <label>Relationship
+              <select name="emergencyRelationship">
+                <option value="">Not specified</option>
+                <option>Spouse</option>
+                <option>Parent</option>
+                <option>Sibling</option>
+                <option>Child</option>
+                <option>Friend</option>
+                <option>Other</option>
+              </select>
+            </label>
+            <label>Contact phone<input name="emergencyPhone" type="tel" maxlength="20" /></label>
             <div class="form-section-heading">Initial Measurements <span class="optional-tag">(optional)</span></div>
             <label>Weight kg<input name="initWeight" type="number" min="0" step="0.1" /></label>
             <label>Height cm<input name="initHeight" type="number" min="0" step="0.1" /></label>
@@ -77,6 +90,9 @@ export const membersModule = {
             <label>Body fat %<input name="initBodyFat" type="number" min="0" step="0.1" /></label>
             <label>Waist cm<input name="initWaist" type="number" min="0" step="0.1" /></label>
             <label>Chest cm<input name="initChest" type="number" min="0" step="0.1" /></label>
+            <label>Hip cm<input name="initHip" type="number" min="0" step="0.1" /></label>
+            <label>Bicep cm<input name="initBicep" type="number" min="0" step="0.1" /></label>
+            <label>Thigh cm<input name="initThigh" type="number" min="0" step="0.1" /></label>
             <label class="wide">Gym goal
               <select name="gymGoal">
                 <option value="">Not specified</option>
@@ -89,6 +105,68 @@ export const membersModule = {
                 <option>Rehabilitation</option>
               </select>
             </label>
+            <div class="form-section-heading">Background <span class="optional-tag">(optional)</span></div>
+            <label>Blood group
+              <select name="bloodGroup">
+                <option value="">Not specified</option>
+                <option>A+</option>
+                <option>A-</option>
+                <option>B+</option>
+                <option>B-</option>
+                <option>O+</option>
+                <option>O-</option>
+                <option>AB+</option>
+                <option>AB-</option>
+              </select>
+            </label>
+            <label>Occupation<input name="occupation" maxlength="80" /></label>
+            <label>Activity level before joining
+              <select name="activityLevel">
+                <option value="">Not specified</option>
+                <option>Sedentary</option>
+                <option>Lightly Active</option>
+                <option>Moderately Active</option>
+                <option>Very Active</option>
+              </select>
+            </label>
+            <label>Fitness experience
+              <select name="fitnessExperience">
+                <option value="">Not specified</option>
+                <option>Beginner</option>
+                <option>Intermediate</option>
+                <option>Advanced</option>
+              </select>
+            </label>
+            <label>How did you hear about us?
+              <select name="referredBy">
+                <option value="">Not specified</option>
+                <option>Walk-in</option>
+                <option>Social Media</option>
+                <option>Friend / Family</option>
+                <option>Online Search</option>
+                <option>Trainer Referral</option>
+                <option>Other</option>
+              </select>
+            </label>
+            <details class="form-section-details wide">
+              <summary class="form-section-heading" style="cursor:pointer;list-style:none;">
+                Health &amp; Medical <span class="optional-tag">(optional — tap to expand)</span>
+              </summary>
+              <div class="form-grid" style="margin-top:10px;">
+                <label class="wide">Medical conditions / health history
+                  <textarea name="medicalConditions" rows="2" placeholder="e.g. Diabetes, Hypertension"></textarea>
+                </label>
+                <label class="wide">Current medications
+                  <textarea name="currentMedications" rows="2" placeholder="e.g. Metformin 500mg"></textarea>
+                </label>
+                <label class="wide">Known allergies
+                  <textarea name="allergies" rows="2" placeholder="e.g. Penicillin, Peanuts"></textarea>
+                </label>
+                <label class="wide">Physical limitations or injuries
+                  <textarea name="physicalLimitations" rows="2" placeholder="e.g. Lower back pain, knee surgery (2024)"></textarea>
+                </label>
+              </div>
+            </details>
           </div>
           <div class="button-row">
             <button class="primary-button" type="submit">Save member</button>
@@ -203,7 +281,10 @@ export const membersModule = {
         bmi:     payload.initBmi     || "",
         bodyFat: payload.initBodyFat || "",
         waist:   payload.initWaist   || "",
-        chest:   payload.initChest   || ""
+        chest:   payload.initChest   || "",
+        hip:     payload.initHip     || "",
+        bicep:   payload.initBicep   || "",
+        thigh:   payload.initThigh   || ""
       };
       const hasMeasurements = Object.values(measurements).some((v) => v !== "");
       payload.status = payload.status === "Suspended" ? "Suspended" : memberStatus(payload);
@@ -218,6 +299,9 @@ export const membersModule = {
             bodyFat: measurements.bodyFat,
             waist:   measurements.waist,
             chest:   measurements.chest,
+            hip:     measurements.hip,
+            bicep:   measurements.bicep,
+            thigh:   measurements.thigh,
             notes:   "Initial admission measurement"
           };
           const savedProgress = await context.services.data.save(collections.progress, progressRecord);
@@ -240,6 +324,9 @@ export const membersModule = {
         Object.entries(member).forEach(([key, value]) => {
           if (form.elements[key]) form.elements[key].value = value || "";
         });
+        if (form.elements.whatsappOptIn) {
+          form.elements.whatsappOptIn.checked = !!member.whatsappOptIn;
+        }
         updateBmi();
         root.querySelector(".panel-heading h2").textContent = "Edit Member";
         form.scrollIntoView({ behavior: "smooth", block: "start" });
