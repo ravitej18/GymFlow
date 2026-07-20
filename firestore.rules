@@ -144,6 +144,45 @@ service cloud.firestore {
       allow update, delete: if owner() && sameGym();
     }
 
+    // Workout module library. Owners manage all same-gym modules. Trainers can
+    // create/update only templates tied to their own trainer roster row.
+    match /workout_templates/{docId} {
+      allow read: if sameGym();
+      allow create: if incomingSameGym() && (
+        owner()
+        || (
+          myRole() == "trainer"
+          && request.resource.data.createdByRole == "trainer"
+          && request.resource.data.createdByUid == uid()
+          && request.resource.data.gymId == myGymId()
+          && (
+            request.resource.data.visibility == "private"
+            || request.resource.data.visibility == "basic"
+          )
+          && exists(/databases/$(database)/documents/trainers/$(request.resource.data.trainerId))
+          && get(/databases/$(database)/documents/trainers/$(request.resource.data.trainerId)).data.uid == uid()
+        )
+      );
+      allow update: if sameGym() && incomingSameGym() && (
+        owner()
+        || (
+          myRole() == "trainer"
+          && resource.data.createdByRole == "trainer"
+          && resource.data.createdByUid == uid()
+          && request.resource.data.createdByRole == "trainer"
+          && request.resource.data.createdByUid == uid()
+          && request.resource.data.trainerId == resource.data.trainerId
+          && (
+            request.resource.data.visibility == "private"
+            || request.resource.data.visibility == "basic"
+          )
+          && exists(/databases/$(database)/documents/trainers/$(resource.data.trainerId))
+          && get(/databases/$(database)/documents/trainers/$(resource.data.trainerId)).data.uid == uid()
+        )
+      );
+      allow delete: if owner() && sameGym();
+    }
+
     // Trainer-authored workout sessions. Any same-gym user can read (member sees
     // their own client-side). Trainer can create sessions for members in their gym
     // by proving the trainerId in the doc matches their own trainers roster uid.

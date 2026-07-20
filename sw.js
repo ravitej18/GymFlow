@@ -1,4 +1,4 @@
-const CACHE_NAME = "gymflow-v15";
+const CACHE_NAME = "gymflow-v16";
 const ASSETS = [
   "./",
   "./index.html",
@@ -22,7 +22,9 @@ const ASSETS = [
   "./modules/settings.js",
   "./modules/my-membership.js",
   "./modules/my-payments.js",
-  "./modules/trainer-checkin.js"
+  "./modules/my-workout.js",
+  "./modules/trainer-checkin.js",
+  "./modules/trainer-members.js"
 ];
 
 self.addEventListener("install", (event) => {

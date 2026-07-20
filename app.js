@@ -39,7 +39,7 @@ const nav = [
   ["reminders", "Reminders", "chat", ["owner"]],
   ["trainers", "Trainers", "badge", ["owner"]],
   ["attendance", "Attendance", "how_to_reg", ALL_ROLES],
-  ["workouts", "Workouts", "fitness_center", ["owner"]],
+  ["workouts", "Workouts", "fitness_center", ["owner", "trainer"]],
   ["progress", "Progress", "trending_up", ALL_ROLES],
   ["reports", "Reports", "bar_chart", ["owner"]],
   ["my-membership", "My Membership", "card_membership", ["member"]],
@@ -47,7 +47,7 @@ const nav = [
   ["my-workout", "My Workout", "fitness_center", ["member"]],
   ["trainer-checkin", "Check In", "how_to_reg", ["trainer"]],
   ["my-checkins", "My Check-ins", "history", ["trainer"]],
-  ["trainer-members", "My Members", "group", ["trainer"]],
+  ["trainer-members", "My Clients", "group", ["trainer"]],
   ["settings", "Settings", "settings", ["owner"]]
 ];
 

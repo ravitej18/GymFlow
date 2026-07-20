@@ -15,11 +15,12 @@ GymFlow is a zero-cost, self-hosted gym management PWA. Phases build out the ful
 - [x] **Phase 7: Trainer-Member Workout Assignment** — Trainers assign plans, author daily sessions; members consume workouts (completed 2026-06-21)
 - [ ] **Phase 8: Member Portal v2** — Member self-edit, receipts, push notifications, trainer details
 - [ ] **Phase 9: Membership Pause & Freeze** — Pause/resume membership, auto-extend end date, per-plan limits
-- [ ] **Phase 10: Member Workout Logging & Exercise Library** — Member self-log sessions, exercise library, PR tracking
-- [ ] **Phase 11: Analytics & Insights** — Revenue trends, member growth, attendance heatmap, forecasting
-- [ ] **Phase 12: Multi-Branch Support** — Branch entity, per-branch scoping, cross-branch dashboard
-- [ ] **Phase 13: Payment Gateway Integration** — Razorpay + Stripe, payment links, webhook auto-update
-- [ ] **Phase 14: Advanced Operations** — Bulk import, WhatsApp Business API, invoice PDF, audit log
+- [ ] **Phase 10: Trainer Workout Module Library** — Trainers create reusable modules, publish Basic workouts for members, assign later to clients
+- [ ] **Phase 11: Member Workout Logging & Exercise Library** — Member self-log sessions, exercise library, PR tracking
+- [ ] **Phase 12: Analytics & Insights** — Revenue trends, member growth, attendance heatmap, forecasting
+- [ ] **Phase 13: Multi-Branch Support** — Branch entity, per-branch scoping, cross-branch dashboard
+- [ ] **Phase 14: Payment Gateway Integration** — Razorpay + Stripe, payment links, webhook auto-update
+- [ ] **Phase 15: Advanced Operations** — Bulk import, WhatsApp Business API, invoice PDF, audit log
 
 ## Phase Details
 
@@ -196,7 +197,26 @@ Plans:
 - [ ] 09-01-PLAN.md — Data infrastructure: membership_pauses collection, memberStatus Paused, Firestore rules, Settings limits panel, Dashboard KPI, Renewals queue filter
 - [ ] 09-02-PLAN.md — Pause/Resume UI: inline pause form on Members page, pause/resume buttons in row actions, validation against limits, endDate extension + early-return refund
 
-### Phase 10: Member Workout Logging & Exercise Library
+### Phase 10: Trainer Workout Module Library
+
+**Goal**: Trainers can create workout modules/templates without selecting a client, publish selected modules as Basic workouts visible to members, and assign modules later to assigned clients.
+**Depends on**: Phase 7
+**Status**: Planned
+**Success Criteria** (what must be TRUE):
+
+  1. Trainer sidebar shows Workouts
+  2. Trainer can create a workout module without selecting a client
+  3. Trainer-created private modules are visible to owner and creator trainer
+  4. Trainer-created Basic modules are visible to all same-gym members in My Workout
+  5. Trainer can assign created modules later to assigned clients
+  6. Trainer interface says My Clients or Assigned Clients, not My Members
+  7. Firestore rules allow trainer-owned template writes and deny spoofed trainerId writes
+
+Plans:
+
+- [ ] 10-01-PLAN.md — Trainer Workout Module Library + Basic Member Library
+
+### Phase 11: Member Workout Logging & Exercise Library
 
 **Goal**: Members self-log their workout sessions backed by a built-in + owner-customizable exercise library.
 **Depends on**: Phase 7
@@ -212,9 +232,9 @@ Plans:
 
 Plans:
 
-- [ ] 10-01: TBD
+- [ ] 11-01: TBD
 
-### Phase 11: Analytics & Insights
+### Phase 12: Analytics & Insights
 
 **Goal**: Give gym owners actionable business intelligence to grow and retain members.
 **Depends on**: Phase 4
@@ -230,9 +250,9 @@ Plans:
 
 Plans:
 
-- [ ] 11-01: TBD
+- [ ] 12-01: TBD
 
-### Phase 12: Multi-Branch Support
+### Phase 13: Multi-Branch Support
 
 **Goal**: Allow a gym chain to manage multiple locations under one owner account.
 **Depends on**: Phase 5
@@ -247,9 +267,9 @@ Plans:
 
 Plans:
 
-- [ ] 12-01: TBD
+- [ ] 13-01: TBD
 
-### Phase 13: Payment Gateway Integration
+### Phase 14: Payment Gateway Integration
 
 **Goal**: Enable members to pay online; auto-update payment status without manual entry.
 **Depends on**: Phase 4
@@ -263,9 +283,9 @@ Plans:
 
 Plans:
 
-- [ ] 13-01: TBD
+- [ ] 14-01: TBD
 
-### Phase 14: Advanced Operations
+### Phase 15: Advanced Operations
 
 **Goal**: Operational efficiency and communication upgrades for larger gyms.
 **Depends on**: Phase 4
@@ -280,7 +300,7 @@ Plans:
 
 Plans:
 
-- [ ] 14-01: TBD
+- [ ] 15-01: TBD
 
 ## Progress
 
@@ -295,8 +315,9 @@ Plans:
 | 7 | Trainer-Member Workout Assignment | 3/3 | Complete   | 2026-06-21 |
 | 8 | Member Portal v2 | 0/1 | Not started | - |
 | 9 | Membership Pause & Freeze | 0/1 | Not started | - |
-| 10 | Member Workout Logging & Exercise Library | 0/1 | Not started | - |
-| 11 | Analytics & Insights | 0/1 | Not started | - |
-| 12 | Multi-Branch Support | 0/1 | Not started | - |
-| 13 | Payment Gateway Integration | 0/1 | Not started | - |
-| 14 | Advanced Operations | 0/1 | Not started | - |
+| 10 | Trainer Workout Module Library | 0/1 | Not started | - |
+| 11 | Member Workout Logging & Exercise Library | 0/1 | Not started | - |
+| 12 | Analytics & Insights | 0/1 | Not started | - |
+| 13 | Multi-Branch Support | 0/1 | Not started | - |
+| 14 | Payment Gateway Integration | 0/1 | Not started | - |
+| 15 | Advanced Operations | 0/1 | Not started | - |

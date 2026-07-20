@@ -5,7 +5,7 @@ milestone_name: milestone
 status: executing
 last_updated: "2026-06-21T08:53:45.029Z"
 progress:
-  total_phases: 14
+  total_phases: 15
   completed_phases: 0
   total_plans: 3
   completed_plans: 0
@@ -39,11 +39,12 @@ progress:
 | 7 | Trainer-Member Workout Assignment | NEXT |
 | 8 | Member Portal v2 | HIGH |
 | 9 | Membership Pause & Freeze | HIGH |
-| 10 | Member Workout Logging & Exercise Library | HIGH |
-| 11 | Analytics & Insights | MEDIUM |
-| 12 | Multi-Branch Support | MEDIUM |
-| 13 | Payment Gateway Integration | MEDIUM |
-| 14 | Advanced Operations | BACKLOG |
+| 10 | Trainer Workout Module Library | HIGH |
+| 11 | Member Workout Logging & Exercise Library | HIGH |
+| 12 | Analytics & Insights | MEDIUM |
+| 13 | Multi-Branch Support | MEDIUM |
+| 14 | Payment Gateway Integration | MEDIUM |
+| 15 | Advanced Operations | BACKLOG |
 
 ## In-Progress Work
 
@@ -67,8 +68,8 @@ progress:
 ## Open Decisions
 
 - Phase 8 (Member Portal v2): needs UX design for notification opt-in flow
-- Phase 12 (Multi-Branch): Firestore security rules need significant redesign for branch scoping
-- Phase 13 (Payment Gateway): Firebase Functions needed for webhook; adds server-side complexity
+- Phase 13 (Multi-Branch): Firestore security rules need significant redesign for branch scoping
+- Phase 14 (Payment Gateway): Firebase Functions needed for webhook; adds server-side complexity
 
 ## Blockers
 
@@ -81,4 +82,5 @@ None currently.
 - `gym.config.js` is git-ignored (contains real Firebase keys) — `.template` is the public version
 - Phase 7 introduces new Firestore collection: `workout_sessions` (trainer-authored daily sessions)
 - Phase 9 introduces new Firestore collection: `membership_pauses`
-- Phase 10 introduces new Firestore collections: `exercise_library`, `workout_logs`, `workout_log_entries`
+- Phase 10 reuses `workout_templates` with trainer ownership and visibility metadata
+- Phase 11 introduces new Firestore collections: `exercise_library`, `workout_logs`, `workout_log_entries`
