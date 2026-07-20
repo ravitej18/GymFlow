@@ -86,7 +86,23 @@ export const membersModule = {
             <div class="form-section-heading">Initial Measurements <span class="optional-tag">(optional)</span></div>
             <label>Weight kg<input name="initWeight" type="number" min="0" step="0.1" /></label>
             <label>Height cm<input name="initHeight" type="number" min="0" step="0.1" /></label>
-            <label>BMI<input name="initBmi" type="number" step="0.1" readonly tabindex="-1" /><span data-bmi-label class="bmi-label"></span></label>
+            <div class="bmi-meter-wrapper wide hidden" data-bmi-meter>
+              <div class="bmi-meter-header">
+                <span class="bmi-meter-value" data-bmi-number>—</span>
+                <span class="bmi-unit">BMI</span>
+                <span class="bmi-meter-category" data-bmi-category></span>
+              </div>
+              <div class="bmi-meter-bar" aria-hidden="true">
+                <div class="bmi-zone bmi-zone--uw"  title="Underweight < 18.5"></div>
+                <div class="bmi-zone bmi-zone--ok"  title="Healthy 18.5–22.9"></div>
+                <div class="bmi-zone bmi-zone--ow"  title="Overweight 23–24.9"></div>
+                <div class="bmi-zone bmi-zone--ob1" title="Obese I 25–29.9"></div>
+                <div class="bmi-zone bmi-zone--ob2" title="Obese II 30–34.9"></div>
+                <div class="bmi-zone bmi-zone--ob3" title="Obese III ≥ 35"></div>
+                <div class="bmi-cursor" data-bmi-cursor></div>
+              </div>
+              <input type="hidden" name="initBmi" data-bmi-hidden />
+            </div>
             <label>Body fat %<input name="initBodyFat" type="number" min="0" step="0.1" /></label>
             <label>Waist cm<input name="initWaist" type="number" min="0" step="0.1" /></label>
             <label>Chest cm<input name="initChest" type="number" min="0" step="0.1" /></label>
@@ -254,15 +270,30 @@ export const membersModule = {
       if (plan) form.endDate.value = addDays(form.startDate.value, plan.durationDays);
     });
 
-    const bmiLabel = form.querySelector("[data-bmi-label]");
+    const bmiMeter    = form.querySelector("[data-bmi-meter]");
+    const bmiNumber   = form.querySelector("[data-bmi-number]");
+    const bmiCatEl    = form.querySelector("[data-bmi-category]");
+    const bmiCursor   = form.querySelector("[data-bmi-cursor]");
+    const bmiHidden   = form.querySelector("[data-bmi-hidden]");
+
     function updateBmi() {
       const val = calcBmi(form.initWeight.value, form.initHeight.value);
-      form.initBmi.value = val;
-      const cat = bmiCategory(val, form.gender.value);
-      if (bmiLabel) {
-        bmiLabel.textContent = cat ? cat.label : "";
-        bmiLabel.style.color = cat ? cat.color : "";
+      if (bmiHidden) bmiHidden.value = val;
+
+      if (!val) {
+        if (bmiMeter) bmiMeter.classList.add("hidden");
+        return;
       }
+
+      if (bmiMeter) bmiMeter.classList.remove("hidden");
+
+      const cat = bmiCategory(val, form.gender.value);
+      if (bmiNumber)  { bmiNumber.textContent = val; bmiNumber.style.color = cat ? cat.color : ""; }
+      if (bmiCatEl)   { bmiCatEl.textContent = cat ? cat.label : ""; bmiCatEl.style.color = cat ? cat.color : ""; }
+
+      // Cursor position: linear scale BMI 10–40 (30-unit range)
+      const pct = Math.min(Math.max((parseFloat(val) - 10) / 30 * 100, 0), 100);
+      if (bmiCursor) bmiCursor.style.left = `${pct}%`;
     }
     form.initWeight?.addEventListener("input", updateBmi);
     form.initHeight?.addEventListener("input", updateBmi);
