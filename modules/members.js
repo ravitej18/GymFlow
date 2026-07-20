@@ -36,8 +36,17 @@ export const membersModule = {
           <div class="panel-heading"><h2>Add Member</h2></div>
           <div class="form-grid">
             <label>Full name<input name="fullName" required maxlength="100" /></label>
-            <label>Mobile<input name="mobile" required maxlength="20" /></label>
-            <label>Email<input name="email" type="email" maxlength="100" /></label>
+            <label>Mobile
+              <input name="mobile" required maxlength="20" />
+              <span class="dup-warn hidden" data-dup-warn="mobile"></span>
+            </label>
+            <label>Email
+              <input name="email" type="email" maxlength="100" />
+              <span class="dup-warn hidden" data-dup-warn="email"></span>
+            </label>
+            <label>WhatsApp number
+              <input name="whatsappNumber" type="tel" maxlength="20" placeholder="Same as mobile" />
+            </label>
             <label>Gender
               <select name="gender">
                 <option>Not specified</option>
@@ -184,6 +193,10 @@ export const membersModule = {
               </div>
             </details>
           </div>
+          <label class="wide checkbox-label">
+            <input type="checkbox" name="whatsappOptIn" value="true" />
+            Consent to WhatsApp reminders about membership &amp; renewals
+          </label>
           <div class="button-row">
             <button class="primary-button" type="submit">Save member</button>
             <button class="ghost-button" type="reset" data-action="clear">Clear</button>
@@ -299,9 +312,75 @@ export const membersModule = {
     form.initHeight?.addEventListener("input", updateBmi);
     form.gender?.addEventListener("change", updateBmi);
 
+    // ── Duplicate detection ─────────────────────────────────────────────────
+    const dupWarnMobile = form.querySelector('[data-dup-warn="mobile"]');
+    const dupWarnEmail  = form.querySelector('[data-dup-warn="email"]');
+
+    function showDupWarn(el, member) {
+      if (!el) return;
+      if (member) {
+        el.textContent = `⚠ Already registered: ${member.fullName} — tap to edit`;
+        el.classList.remove("hidden");
+        el.dataset.editTarget = member.id;
+      } else {
+        el.textContent = "";
+        el.classList.add("hidden");
+        delete el.dataset.editTarget;
+      }
+    }
+
+    form.mobile?.addEventListener("blur", () => {
+      const val    = form.mobile.value.trim();
+      const editId = form.elements['id']?.value || "";
+      const match  = val
+        ? context.data.members.find(m => m.mobile?.trim() === val && m.id !== editId)
+        : null;
+      showDupWarn(dupWarnMobile, match);
+    });
+
+    form.email?.addEventListener("blur", () => {
+      const val    = form.email.value.trim().toLowerCase();
+      const editId = form.elements['id']?.value || "";
+      const match  = val
+        ? context.data.members.find(m => m.email?.trim().toLowerCase() === val && m.id !== editId)
+        : null;
+      showDupWarn(dupWarnEmail, match);
+    });
+
+    [dupWarnMobile, dupWarnEmail].forEach(el => {
+      el?.addEventListener("click", () => {
+        if (!el.dataset.editTarget) return;
+        const member = context.data.members.find(m => m.id === el.dataset.editTarget);
+        if (!member) return;
+        Object.entries(member).forEach(([key, value]) => {
+          if (form.elements[key]) form.elements[key].value = value || "";
+        });
+        if (form.elements.whatsappOptIn) {
+          form.elements.whatsappOptIn.checked = !!member.whatsappOptIn;
+        }
+        updateBmi();
+        root.querySelector(".panel-heading h2").textContent = "Edit Member";
+        form.scrollIntoView({ behavior: "smooth", block: "start" });
+        showDupWarn(dupWarnMobile, null);
+        showDupWarn(dupWarnEmail,  null);
+      });
+    });
+
+    // ── WhatsApp number auto-sync ───────────────────────────────────────
+    let lastMobileSync = "";
+    form.mobile?.addEventListener("input", () => {
+      const whatsappEl = form.elements.whatsappNumber;
+      if (!whatsappEl) return;
+      if (!whatsappEl.value || whatsappEl.value === lastMobileSync) {
+        whatsappEl.value = form.mobile.value;
+      }
+      lastMobileSync = form.mobile.value;
+    });
+
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       const payload = formData(form);
+      payload.whatsappOptIn = payload.whatsappOptIn === "true";
       if (payload.endDate && payload.startDate && payload.endDate < payload.startDate) {
         context.toast("End date can't be before the start date.");
         return;
@@ -528,6 +607,8 @@ export const membersModule = {
 
     root.querySelector("[data-action='clear']")?.addEventListener("click", () => {
       root.querySelector(".panel-heading h2").textContent = "Add Member";
+      showDupWarn(dupWarnMobile, null);
+      showDupWarn(dupWarnEmail,  null);
     });
   }
 };

@@ -714,6 +714,45 @@ label.wide,
 .form-section-details > summary { display: block; padding: 8px 0; border-top: 1px solid var(--border); }
 .form-section-details > summary::-webkit-details-marker,
 .form-section-details > summary::marker { display: none; content: ""; }
+/* Duplicate detection warning */
+.dup-warn {
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--warning-ink, #92400e);
+  background: var(--warning-bg, #fef3c7);
+  border: 1px solid var(--warning-border, #fcd34d);
+  border-radius: var(--r-sm, 4px);
+  padding: 4px 8px;
+  margin-top: 4px;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: normal;
+  line-height: 1.4;
+}
+.dup-warn:hover { text-decoration: underline; }
+/* WhatsApp opt-in checkbox row */
+.checkbox-label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: normal;
+  cursor: pointer;
+  color: var(--ink);
+  padding: 2px 0 8px;
+}
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  min-height: unset;
+  flex-shrink: 0;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
 input[readonly] { background: var(--surface-alt, var(--surface)); cursor: default; }
 
 input, select, textarea {
