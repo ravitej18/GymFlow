@@ -36,8 +36,17 @@ export const membersModule = {
           <div class="panel-heading"><h2>Add Member</h2></div>
           <div class="form-grid">
             <label>Full name<input name="fullName" required maxlength="100" /></label>
-            <label>Mobile<input name="mobile" required maxlength="20" /></label>
-            <label>Email<input name="email" type="email" maxlength="100" /></label>
+            <label>Mobile
+              <input name="mobile" required maxlength="20" />
+              <span class="dup-warn hidden" data-dup-warn="mobile"></span>
+            </label>
+            <label>Email
+              <input name="email" type="email" maxlength="100" />
+              <span class="dup-warn hidden" data-dup-warn="email"></span>
+            </label>
+            <label>WhatsApp number
+              <input name="whatsappNumber" type="tel" maxlength="20" placeholder="Same as mobile" />
+            </label>
             <label>Gender
               <select name="gender">
                 <option>Not specified</option>
@@ -69,14 +78,46 @@ export const membersModule = {
               </select>
             </label>
             <label class="wide">Address<textarea name="address" rows="2"></textarea></label>
-            <label class="wide">Emergency contact<input name="emergencyContact" maxlength="120" /></label>
+            <div class="form-section-heading">Emergency Contact <span class="optional-tag">(optional)</span></div>
+            <label>Contact name<input name="emergencyName" maxlength="80" /></label>
+            <label>Relationship
+              <select name="emergencyRelationship">
+                <option value="">Not specified</option>
+                <option>Spouse</option>
+                <option>Parent</option>
+                <option>Sibling</option>
+                <option>Child</option>
+                <option>Friend</option>
+                <option>Other</option>
+              </select>
+            </label>
+            <label>Contact phone<input name="emergencyPhone" type="tel" maxlength="20" /></label>
             <div class="form-section-heading">Initial Measurements <span class="optional-tag">(optional)</span></div>
             <label>Weight kg<input name="initWeight" type="number" min="0" step="0.1" /></label>
             <label>Height cm<input name="initHeight" type="number" min="0" step="0.1" /></label>
-            <label>BMI<input name="initBmi" type="number" step="0.1" readonly tabindex="-1" /><span data-bmi-label class="bmi-label"></span></label>
+            <div class="bmi-meter-wrapper wide hidden" data-bmi-meter>
+              <div class="bmi-meter-header">
+                <span class="bmi-meter-value" data-bmi-number>—</span>
+                <span class="bmi-unit">BMI</span>
+                <span class="bmi-meter-category" data-bmi-category></span>
+              </div>
+              <div class="bmi-meter-bar" aria-hidden="true">
+                <div class="bmi-zone bmi-zone--uw"  title="Underweight < 18.5"></div>
+                <div class="bmi-zone bmi-zone--ok"  title="Healthy 18.5–22.9"></div>
+                <div class="bmi-zone bmi-zone--ow"  title="Overweight 23–24.9"></div>
+                <div class="bmi-zone bmi-zone--ob1" title="Obese I 25–29.9"></div>
+                <div class="bmi-zone bmi-zone--ob2" title="Obese II 30–34.9"></div>
+                <div class="bmi-zone bmi-zone--ob3" title="Obese III ≥ 35"></div>
+                <div class="bmi-cursor" data-bmi-cursor></div>
+              </div>
+              <input type="hidden" name="initBmi" data-bmi-hidden />
+            </div>
             <label>Body fat %<input name="initBodyFat" type="number" min="0" step="0.1" /></label>
             <label>Waist cm<input name="initWaist" type="number" min="0" step="0.1" /></label>
             <label>Chest cm<input name="initChest" type="number" min="0" step="0.1" /></label>
+            <label>Hip cm<input name="initHip" type="number" min="0" step="0.1" /></label>
+            <label>Bicep cm<input name="initBicep" type="number" min="0" step="0.1" /></label>
+            <label>Thigh cm<input name="initThigh" type="number" min="0" step="0.1" /></label>
             <label class="wide">Gym goal
               <select name="gymGoal">
                 <option value="">Not specified</option>
@@ -89,7 +130,73 @@ export const membersModule = {
                 <option>Rehabilitation</option>
               </select>
             </label>
+            <div class="form-section-heading">Background <span class="optional-tag">(optional)</span></div>
+            <label>Blood group
+              <select name="bloodGroup">
+                <option value="">Not specified</option>
+                <option>A+</option>
+                <option>A-</option>
+                <option>B+</option>
+                <option>B-</option>
+                <option>O+</option>
+                <option>O-</option>
+                <option>AB+</option>
+                <option>AB-</option>
+              </select>
+            </label>
+            <label>Occupation<input name="occupation" maxlength="80" /></label>
+            <label>Activity level before joining
+              <select name="activityLevel">
+                <option value="">Not specified</option>
+                <option>Sedentary</option>
+                <option>Lightly Active</option>
+                <option>Moderately Active</option>
+                <option>Very Active</option>
+              </select>
+            </label>
+            <label>Fitness experience
+              <select name="fitnessExperience">
+                <option value="">Not specified</option>
+                <option>Beginner</option>
+                <option>Intermediate</option>
+                <option>Advanced</option>
+              </select>
+            </label>
+            <label>How did you hear about us?
+              <select name="referredBy">
+                <option value="">Not specified</option>
+                <option>Walk-in</option>
+                <option>Social Media</option>
+                <option>Friend / Family</option>
+                <option>Online Search</option>
+                <option>Trainer Referral</option>
+                <option>Other</option>
+              </select>
+            </label>
+            <details class="form-section-details wide">
+              <summary class="form-section-heading" style="cursor:pointer;list-style:none;">
+                Health &amp; Medical <span class="optional-tag">(optional — tap to expand)</span>
+              </summary>
+              <div class="form-grid" style="margin-top:10px;">
+                <label class="wide">Medical conditions / health history
+                  <textarea name="medicalConditions" rows="2" placeholder="e.g. Diabetes, Hypertension"></textarea>
+                </label>
+                <label class="wide">Current medications
+                  <textarea name="currentMedications" rows="2" placeholder="e.g. Metformin 500mg"></textarea>
+                </label>
+                <label class="wide">Known allergies
+                  <textarea name="allergies" rows="2" placeholder="e.g. Penicillin, Peanuts"></textarea>
+                </label>
+                <label class="wide">Physical limitations or injuries
+                  <textarea name="physicalLimitations" rows="2" placeholder="e.g. Lower back pain, knee surgery (2024)"></textarea>
+                </label>
+              </div>
+            </details>
           </div>
+          <label class="wide checkbox-label">
+            <input type="checkbox" name="whatsappOptIn" value="true" />
+            Consent to WhatsApp reminders about membership &amp; renewals
+          </label>
           <div class="button-row">
             <button class="primary-button" type="submit">Save member</button>
             <button class="ghost-button" type="reset" data-action="clear">Clear</button>
@@ -176,23 +283,104 @@ export const membersModule = {
       if (plan) form.endDate.value = addDays(form.startDate.value, plan.durationDays);
     });
 
-    const bmiLabel = form.querySelector("[data-bmi-label]");
+    const bmiMeter    = form.querySelector("[data-bmi-meter]");
+    const bmiNumber   = form.querySelector("[data-bmi-number]");
+    const bmiCatEl    = form.querySelector("[data-bmi-category]");
+    const bmiCursor   = form.querySelector("[data-bmi-cursor]");
+    const bmiHidden   = form.querySelector("[data-bmi-hidden]");
+
     function updateBmi() {
       const val = calcBmi(form.initWeight.value, form.initHeight.value);
-      form.initBmi.value = val;
-      const cat = bmiCategory(val, form.gender.value);
-      if (bmiLabel) {
-        bmiLabel.textContent = cat ? cat.label : "";
-        bmiLabel.style.color = cat ? cat.color : "";
+      if (bmiHidden) bmiHidden.value = val;
+
+      if (!val) {
+        if (bmiMeter) bmiMeter.classList.add("hidden");
+        return;
       }
+
+      if (bmiMeter) bmiMeter.classList.remove("hidden");
+
+      const cat = bmiCategory(val, form.gender.value);
+      if (bmiNumber)  { bmiNumber.textContent = val; bmiNumber.style.color = cat ? cat.color : ""; }
+      if (bmiCatEl)   { bmiCatEl.textContent = cat ? cat.label : ""; bmiCatEl.style.color = cat ? cat.color : ""; }
+
+      // Cursor position: linear scale BMI 10–40 (30-unit range)
+      const pct = Math.min(Math.max((parseFloat(val) - 10) / 30 * 100, 0), 100);
+      if (bmiCursor) bmiCursor.style.left = `${pct}%`;
     }
     form.initWeight?.addEventListener("input", updateBmi);
     form.initHeight?.addEventListener("input", updateBmi);
     form.gender?.addEventListener("change", updateBmi);
 
+    // ── Duplicate detection ─────────────────────────────────────────────────
+    const dupWarnMobile = form.querySelector('[data-dup-warn="mobile"]');
+    const dupWarnEmail  = form.querySelector('[data-dup-warn="email"]');
+
+    function showDupWarn(el, member) {
+      if (!el) return;
+      if (member) {
+        el.textContent = `⚠ Already registered: ${member.fullName} — tap to edit`;
+        el.classList.remove("hidden");
+        el.dataset.editTarget = member.id;
+      } else {
+        el.textContent = "";
+        el.classList.add("hidden");
+        delete el.dataset.editTarget;
+      }
+    }
+
+    form.mobile?.addEventListener("blur", () => {
+      const val    = form.mobile.value.trim();
+      const editId = form.elements['id']?.value || "";
+      const match  = val
+        ? context.data.members.find(m => m.mobile?.trim() === val && m.id !== editId)
+        : null;
+      showDupWarn(dupWarnMobile, match);
+    });
+
+    form.email?.addEventListener("blur", () => {
+      const val    = form.email.value.trim().toLowerCase();
+      const editId = form.elements['id']?.value || "";
+      const match  = val
+        ? context.data.members.find(m => m.email?.trim().toLowerCase() === val && m.id !== editId)
+        : null;
+      showDupWarn(dupWarnEmail, match);
+    });
+
+    [dupWarnMobile, dupWarnEmail].forEach(el => {
+      el?.addEventListener("click", () => {
+        if (!el.dataset.editTarget) return;
+        const member = context.data.members.find(m => m.id === el.dataset.editTarget);
+        if (!member) return;
+        Object.entries(member).forEach(([key, value]) => {
+          if (form.elements[key]) form.elements[key].value = value || "";
+        });
+        if (form.elements.whatsappOptIn) {
+          form.elements.whatsappOptIn.checked = !!member.whatsappOptIn;
+        }
+        updateBmi();
+        root.querySelector(".panel-heading h2").textContent = "Edit Member";
+        form.scrollIntoView({ behavior: "smooth", block: "start" });
+        showDupWarn(dupWarnMobile, null);
+        showDupWarn(dupWarnEmail,  null);
+      });
+    });
+
+    // ── WhatsApp number auto-sync ───────────────────────────────────────
+    let lastMobileSync = "";
+    form.mobile?.addEventListener("input", () => {
+      const whatsappEl = form.elements.whatsappNumber;
+      if (!whatsappEl) return;
+      if (!whatsappEl.value || whatsappEl.value === lastMobileSync) {
+        whatsappEl.value = form.mobile.value;
+      }
+      lastMobileSync = form.mobile.value;
+    });
+
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       const payload = formData(form);
+      payload.whatsappOptIn = payload.whatsappOptIn === "true";
       if (payload.endDate && payload.startDate && payload.endDate < payload.startDate) {
         context.toast("End date can't be before the start date.");
         return;
@@ -203,7 +391,10 @@ export const membersModule = {
         bmi:     payload.initBmi     || "",
         bodyFat: payload.initBodyFat || "",
         waist:   payload.initWaist   || "",
-        chest:   payload.initChest   || ""
+        chest:   payload.initChest   || "",
+        hip:     payload.initHip     || "",
+        bicep:   payload.initBicep   || "",
+        thigh:   payload.initThigh   || ""
       };
       const hasMeasurements = Object.values(measurements).some((v) => v !== "");
       payload.status = payload.status === "Suspended" ? "Suspended" : memberStatus(payload);
@@ -218,6 +409,9 @@ export const membersModule = {
             bodyFat: measurements.bodyFat,
             waist:   measurements.waist,
             chest:   measurements.chest,
+            hip:     measurements.hip,
+            bicep:   measurements.bicep,
+            thigh:   measurements.thigh,
             notes:   "Initial admission measurement"
           };
           const savedProgress = await context.services.data.save(collections.progress, progressRecord);
@@ -240,6 +434,9 @@ export const membersModule = {
         Object.entries(member).forEach(([key, value]) => {
           if (form.elements[key]) form.elements[key].value = value || "";
         });
+        if (form.elements.whatsappOptIn) {
+          form.elements.whatsappOptIn.checked = !!member.whatsappOptIn;
+        }
         updateBmi();
         root.querySelector(".panel-heading h2").textContent = "Edit Member";
         form.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -410,6 +607,8 @@ export const membersModule = {
 
     root.querySelector("[data-action='clear']")?.addEventListener("click", () => {
       root.querySelector(".panel-heading h2").textContent = "Add Member";
+      showDupWarn(dupWarnMobile, null);
+      showDupWarn(dupWarnEmail,  null);
     });
   }
 };

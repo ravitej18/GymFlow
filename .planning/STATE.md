@@ -18,8 +18,8 @@ progress:
 
 - **Milestone:** v0.9 Beta
 - **Active Branch:** `ui/dark-mode-animations-polish`
-- **Last Phase Completed:** Phase 6 — UI Design System & Dark Mode
-- **Next Phase:** Phase 7 — Trainer-Member Workout Assignment
+- **Last Phase Completed:** Phase 10 — Trainer Workout Module Library
+- **Next Phase:** Phase 10.1 — Enhanced Member Intake Form & BMI Visual Meter ⚡ URGENT
 
 ## Completed Phases
 
@@ -31,15 +31,16 @@ progress:
 | 4 | Reports & Settings | main | — |
 | 5 | Auth, Roles & PWA | main | — |
 | 6 | UI Design System & Dark Mode | ui/dark-mode-animations-polish | 2026-06-14 |
+| 7 | Trainer-Member Workout Assignment | main (#11) | 2026-06-21 |
+| 8 | Member Portal v2 | main | — |
+| 9 | Membership Pause & Freeze | main | — |
+| 10 | Trainer Workout Module Library | main (#12) | — |
 
 ## Upcoming Phases (Priority Order)
 
 | Phase | Name | Priority |
 |---|---|---|
-| 7 | Trainer-Member Workout Assignment | NEXT |
-| 8 | Member Portal v2 | HIGH |
-| 9 | Membership Pause & Freeze | HIGH |
-| 10 | Trainer Workout Module Library | HIGH |
+| 10.1 | Enhanced Member Intake Form & BMI Visual Meter | URGENT NEXT |
 | 11 | Member Workout Logging & Exercise Library | HIGH |
 | 12 | Analytics & Insights | MEDIUM |
 | 13 | Multi-Branch Support | MEDIUM |
@@ -48,11 +49,9 @@ progress:
 
 ## In-Progress Work
 
-- **Branch:** `ui/dark-mode-animations-polish`
-- **Commits:**
-  - `3515298` — ui: dark/light mode, tablet layout, motion system, nav polish, topbar toggle
-  - `ff22862` — ui: add 10 config-file color themes with flash-free boot
-- **Status:** Executing Phase 07
+- **Branch:** `main`
+- **Last merged commit:** `517a3ff` — Add trainer workout module library and basic member workouts (#12)
+- **Status:** Phase 10 complete; Phase 10.1 not yet started
 
 ## Key Architectural Facts
 
