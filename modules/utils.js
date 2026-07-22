@@ -173,10 +173,19 @@ export function initials(name = "") {
   return parsed || "--";
 }
 
-export function nameCell(name, sub = "") {
+export const CARTOON_AVATARS = Array.from({ length: 30 }, (_, i) => {
+  // Utilizing Adventure style from Dicebear with varied seeds
+  return `https://api.dicebear.com/7.x/adventurer/svg?seed=adventurer-seed-${i + 1}`;
+});
+
+export function nameCell(name, sub = "", avatarUrl = "") {
+  const avatarContent = avatarUrl 
+    ? `<img src="${escapeHtml(avatarUrl)}" alt="" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />`
+    : escapeHtml(initials(name));
+
   return `
     <span class="name-cell">
-      <span class="avatar small">${escapeHtml(initials(name))}</span>
+      <span class="avatar small">${avatarContent}</span>
       <span class="name-cell-text">
         <strong>${escapeHtml(name || "-")}</strong>
         ${sub ? `<small>${escapeHtml(sub)}</small>` : ""}

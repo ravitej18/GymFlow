@@ -17,6 +17,7 @@ import { myPaymentsModule } from "./modules/my-payments.js";
 import { trainerCheckinModule } from "./modules/trainer-checkin.js";
 import { trainerMembersModule } from "./modules/trainer-members.js";
 import { myWorkoutModule } from "./modules/my-workout.js";
+import { CARTOON_AVATARS, escapeHtml } from "./modules/utils.js";
 
 const appRoot = document.querySelector("#app");
 
@@ -280,8 +281,12 @@ function render() {
           .join("")}
       </nav>
       <div class="sidebar-footer">
-        <div class="profile-chip">
-          <span class="avatar">${initials(state.profile.name)}</span>
+        <div class="profile-chip" style="cursor: pointer;" title="Edit Profile">
+          <span class="avatar">
+            ${state.profile.avatarUrl 
+              ? `<img src="${escapeHtml(state.profile.avatarUrl)}" alt="" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />` 
+              : initials(state.profile.name)}
+          </span>
           <div>
             <strong>${state.profile.name}</strong>
             <span>${state.profile.role}</span>
@@ -361,6 +366,10 @@ function makeContext() {
 }
 
 function bindAppEvents() {
+  document.querySelector(".profile-chip")?.addEventListener("click", () => {
+    openProfileModal(makeContext());
+  });
+
   document.querySelector("[data-action='logout']")?.addEventListener("click", async () => {
     await state.services.auth.logout();
     showToast("Signed out.");
@@ -454,4 +463,89 @@ function registerServiceWorker() {
   }
 
   navigator.serviceWorker.register("./sw.js").catch(() => {});
+}
+
+function openProfileModal(context) {
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  
+  let selectedAvatar = context.profile.avatarUrl || "";
+  
+  overlay.innerHTML = `
+    <div class="modal" role="dialog" aria-modal="true" style="width: min(500px, 100%);">
+      <div class="panel-heading" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 10px;">
+        <h2 style="margin: 0; font-size: 1.35rem;">Edit Profile</h2>
+        <button class="ghost-button" data-modal="close" style="min-width: unset; padding: 4px; border: none; background: transparent; cursor: pointer;" title="Close">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <form id="profile-edit-form" class="stack" style="gap: 16px;">
+        <label>Your Name
+          <input name="name" value="${escapeHtml(context.profile.name)}" required style="width: 100%; margin-top: 6px;" />
+        </label>
+        
+        <div>
+          <label style="margin-bottom: 8px; display: block;">Choose Avatar</label>
+          <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; max-height: 240px; overflow-y: auto; padding: 8px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface-light, rgba(255,255,255,0.02));">
+            ${CARTOON_AVATARS.map((url, index) => {
+              const isSelected = selectedAvatar === url;
+              return `
+                <div class="avatar-option-wrapper" data-avatar-url="${escapeHtml(url)}" style="cursor: pointer; border-radius: 50%; overflow: hidden; border: 3px solid ${isSelected ? "var(--primary)" : "transparent"}; aspect-ratio: 1; transition: border-color 0.2s;">
+                  <img src="${escapeHtml(url)}" alt="Avatar ${index + 1}" style="width: 100%; height: 100%; object-fit: cover;" />
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+        
+        <div class="button-row modal-actions" style="margin-top: 10px;">
+          <button class="ghost-button" data-modal="close" type="button">Cancel</button>
+          <button class="primary-button" type="submit">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  const form = overlay.querySelector("#profile-edit-form");
+  
+  // Handle avatar selection
+  overlay.querySelectorAll(".avatar-option-wrapper").forEach((el) => {
+    el.addEventListener("click", () => {
+      overlay.querySelectorAll(".avatar-option-wrapper").forEach((item) => {
+        item.style.borderColor = "transparent";
+      });
+      el.style.borderColor = "var(--primary)";
+      selectedAvatar = el.dataset.avatarUrl;
+    });
+  });
+
+  function close() {
+    overlay.remove();
+  }
+
+  overlay.querySelector("[data-modal='close']").addEventListener("click", close);
+  overlay.querySelector("button[data-modal='close']").addEventListener("click", close);
+  
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const submitBtn = form.querySelector("[type='submit']");
+    const name = form.querySelector("[name='name']").value.trim();
+    if (!name) return;
+
+    submitBtn.disabled = true;
+    try {
+      await context.services.auth.updateProfile({
+        name,
+        avatarUrl: selectedAvatar
+      });
+      context.toast("Profile updated successfully.");
+      close();
+    } catch (error) {
+      console.error(error);
+      context.toast("Failed to update profile.");
+      submitBtn.disabled = false;
+    }
+  });
+
+  document.body.appendChild(overlay);
 }

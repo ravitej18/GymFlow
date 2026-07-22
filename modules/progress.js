@@ -166,7 +166,7 @@ function chartFor(records, memberId, metricKey) {
 function row(record, members) {
   return `
     <div class="table-row">
-      <span>${nameCell(findName(members, record.memberId))}</span>
+      <span>${nameCell(findName(members, record.memberId), "", members.find(m => m.id === record.memberId)?.avatarUrl || "")}</span>
       <span>${dateLabel(record.date)}</span>
       <span>${escapeHtml(record.weight || "-")}</span>
       <span>${escapeHtml(record.bmi || "-")}</span>

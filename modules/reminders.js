@@ -45,7 +45,7 @@ function row(member, settings) {
   const message = buildMessage(member, settings);
   return `
     <div class="table-row">
-      ${nameCell(member.fullName, member.mobile || "")}
+      ${nameCell(member.fullName, member.mobile || "", member.avatarUrl || "")}
       <span>${dateLabel(member.endDate)}</span>
       <span><mark class="status ${statusClass(member.computedStatus)}">${escapeHtml(member.computedStatus)}</mark></span>
       <span><small>${escapeHtml(message)}</small></span>
