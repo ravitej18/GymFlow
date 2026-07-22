@@ -246,7 +246,7 @@ function updateRowPreview(row, list) {
   const val = input.value.trim().toLowerCase();
   const matched = list.find((ex) => ex.name.toLowerCase() === val);
   if (matched && matched.image) {
-    const imageUrl = `https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/images/${matched.image}`;
+    const imageUrl = `https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/${matched.image}`;
     preview.innerHTML = `<img src="${imageUrl}" alt="${escapeHtml(matched.name)}" style="width: 100%; height: 100%; object-fit: cover;" />`;
     preview.style.display = "block";
     preview.title = `${matched.name} - Click to view instructions`;

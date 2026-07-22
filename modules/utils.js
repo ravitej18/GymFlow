@@ -313,7 +313,7 @@ export function showExerciseModal(exercise) {
   overlay.className = "modal-overlay";
   
   const gifUrl = exercise.gif 
-    ? `https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/videos/${exercise.gif}`
+    ? `https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/${exercise.gif}`
     : '';
   
   overlay.innerHTML = `
