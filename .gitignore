@@ -14,3 +14,7 @@ firebase-admin*.json
 # OS/editor noise
 .DS_Store
 Thumbs.db
+
+# Kilo config and GSD framework
+.kilo/
+.agents/

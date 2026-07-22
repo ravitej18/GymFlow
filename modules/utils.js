@@ -284,3 +284,80 @@ export function trendChart(points, { color = "var(--teal)", height = 160 } = {})
     </div>
   `;
 }
+
+let exercisesPromise = null;
+let exercisesList = [];
+
+export function getExercises() {
+  if (!exercisesPromise) {
+    exercisesPromise = fetch("./lib/exercises-pruned.json")
+      .then((res) => res.json())
+      .then((data) => {
+        exercisesList = data;
+        return data;
+      })
+      .catch((err) => {
+        console.error("Failed to load exercises:", err);
+        return [];
+      });
+  }
+  return exercisesPromise;
+}
+
+export function getExercisesList() {
+  return exercisesList;
+}
+
+export function showExerciseModal(exercise) {
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  
+  const gifUrl = exercise.gif 
+    ? `https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/videos/${exercise.gif}`
+    : '';
+  
+  overlay.innerHTML = `
+    <div class="modal" role="dialog" aria-modal="true" style="width: min(540px, 100%);">
+      <div class="panel-heading" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 10px;">
+        <h2 style="margin: 0; font-size: 1.35rem;">${escapeHtml(exercise.name)}</h2>
+        <button class="ghost-button" data-modal="close" style="min-width: unset; padding: 4px; border: none; background: transparent; cursor: pointer;" title="Close">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 12px; max-height: 70vh; overflow-y: auto;">
+        ${gifUrl ? `
+          <div style="display: flex; justify-content: center; background: #000; border-radius: var(--r-md); overflow: hidden; max-height: 240px;">
+            <img src="${gifUrl}" alt="${escapeHtml(exercise.name)}" style="max-width: 100%; height: auto; object-fit: contain;" />
+          </div>
+        ` : ''}
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <span style="background: var(--surface-light, rgba(255,255,255,0.05)); border: 1px solid var(--line); padding: 4px 8px; border-radius: var(--r-sm); font-size: 0.85em;">Category: <strong>${escapeHtml(exercise.category)}</strong></span>
+          <span style="background: var(--surface-light, rgba(255,255,255,0.05)); border: 1px solid var(--line); padding: 4px 8px; border-radius: var(--r-sm); font-size: 0.85em;">Target: <strong>${escapeHtml(exercise.target)}</strong></span>
+          <span style="background: var(--surface-light, rgba(255,255,255,0.05)); border: 1px solid var(--line); padding: 4px 8px; border-radius: var(--r-sm); font-size: 0.85em;">Equipment: <strong>${escapeHtml(exercise.equipment)}</strong></span>
+        </div>
+        <div style="border-top: 1px solid var(--line); padding-top: 10px;">
+          <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 1.1rem;">Instructions</h3>
+          <ol style="padding-left: 20px; margin: 0; line-height: 1.55; color: var(--text);">
+            ${exercise.steps.map(step => `<li style="margin-bottom: 8px;">${escapeHtml(step)}</li>`).join('')}
+          </ol>
+        </div>
+      </div>
+    </div>
+  `;
+
+  function close() {
+    document.removeEventListener("keydown", onKey);
+    overlay.remove();
+  }
+  function onKey(event) {
+    if (event.key === "Escape") close();
+  }
+
+  overlay.addEventListener("click", (event) => {
+    if (event.target === overlay) close();
+  });
+  overlay.querySelector("[data-modal='close']").addEventListener("click", close);
+  document.addEventListener("keydown", onKey);
+  document.body.appendChild(overlay);
+}
+

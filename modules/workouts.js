@@ -1,4 +1,4 @@
-import { collections, emptyState, escapeHtml, formData, pageHeader, withButtonLoading } from "./utils.js";
+import { collections, emptyState, escapeHtml, formData, pageHeader, withButtonLoading, getExercises, getExercisesList, showExerciseModal } from "./utils.js";
 
 const GOALS = ["Weight Loss", "Muscle Gain", "Strength", "Mobility", "Cardio", "General Fitness"];
 const CATEGORIES = ["Strength", "Weight Loss", "Mobility", "Beginner", "Cardio", "Conditioning"];
@@ -107,11 +107,23 @@ export const workoutsModule = {
           }
         </section>
       </div>
+      <datalist id="exercise-options"></datalist>
     `;
   },
   bind(root, context) {
     const form = root.querySelector("#workout-form");
     bindStructuredRows(root);
+
+    getExercises().then((list) => {
+      const datalist = root.querySelector("#exercise-options");
+      if (datalist) {
+        datalist.innerHTML = list.map((item) => `<option value="${escapeHtml(item.name)}">${escapeHtml(item.category || item.target || '')}</option>`).join("");
+      }
+      // Update preview for initial rows if any
+      root.querySelectorAll("[data-exercise-row]").forEach((row) => {
+        updateRowPreview(row, list);
+      });
+    });
 
     form?.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -143,6 +155,20 @@ export const workoutsModule = {
     });
 
     bindTemplateFilters(root);
+
+    root.addEventListener("click", async (event) => {
+      const item = event.target.closest(".clickable-exercise-item");
+      if (!item) return;
+      
+      const name = item.dataset.exerciseName;
+      if (!name) return;
+
+      const list = await getExercises();
+      const matched = list.find((ex) => ex.name.toLowerCase() === name.toLowerCase());
+      if (matched) {
+        showExerciseModal(matched);
+      }
+    });
   }
 };
 
@@ -161,8 +187,11 @@ export function renderTemplateExercises(template) {
     return `
       <div class="structured-exercise-list">
         ${structured.map((row) => `
-          <div class="structured-exercise-item">
-            <strong>${escapeHtml(row.name)}</strong>
+          <div class="structured-exercise-item clickable-exercise-item" data-exercise-name="${escapeHtml(row.name)}" style="cursor: pointer; position: relative;" title="Click to view details & demo">
+            <strong style="display: flex; align-items: center; gap: 4px;">
+              ${escapeHtml(row.name)}
+              <span class="material-symbols-outlined" style="font-size: 14px; opacity: 0.6;">info</span>
+            </strong>
             <span>${escapeHtml(exerciseSummary(row))}</span>
             ${row.notes ? `<small>${escapeHtml(row.notes)}</small>` : ""}
           </div>
@@ -210,17 +239,61 @@ function normalizeTemplatePayload(payload, context, structuredExercises = []) {
   return normalized;
 }
 
+function updateRowPreview(row, list) {
+  const input = row.querySelector("[data-exercise-name]");
+  const preview = row.querySelector("[data-exercise-preview]");
+  if (!input || !preview) return;
+  const val = input.value.trim().toLowerCase();
+  const matched = list.find((ex) => ex.name.toLowerCase() === val);
+  if (matched && matched.image) {
+    const imageUrl = `https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/images/${matched.image}`;
+    preview.innerHTML = `<img src="${imageUrl}" alt="${escapeHtml(matched.name)}" style="width: 100%; height: 100%; object-fit: cover;" />`;
+    preview.style.display = "block";
+    preview.title = `${matched.name} - Click to view instructions`;
+  } else {
+    preview.innerHTML = "";
+    preview.style.display = "none";
+    preview.title = "";
+  }
+}
+
 function bindStructuredRows(root) {
   const rows = root.querySelector("[data-exercise-rows]");
   root.querySelector("[data-action='add-exercise-row']")?.addEventListener("click", () => {
     rows?.insertAdjacentHTML("beforeend", exerciseRowHtml());
   });
+
+  rows?.addEventListener("input", (event) => {
+    const input = event.target.closest("[data-exercise-name]");
+    if (!input) return;
+    const row = input.closest("[data-exercise-row]");
+    if (row) {
+      updateRowPreview(row, getExercisesList());
+    }
+  });
+
   rows?.addEventListener("click", (event) => {
+    const preview = event.target.closest("[data-exercise-preview]");
+    if (preview) {
+      const row = preview.closest("[data-exercise-row]");
+      const val = row?.querySelector("[data-exercise-name]")?.value.trim().toLowerCase();
+      const matched = getExercisesList().find((ex) => ex.name.toLowerCase() === val);
+      if (matched) {
+        showExerciseModal(matched);
+      }
+      return;
+    }
+
     const remove = event.target.closest("[data-remove-exercise-row]");
     if (!remove) return;
     const row = remove.closest("[data-exercise-row]");
     if (rows.querySelectorAll("[data-exercise-row]").length === 1) {
       row.querySelectorAll("input").forEach((input) => (input.value = ""));
+      const previewEl = row.querySelector("[data-exercise-preview]");
+      if (previewEl) {
+        previewEl.innerHTML = "";
+        previewEl.style.display = "none";
+      }
     } else {
       row.remove();
     }
@@ -248,7 +321,10 @@ function collectStructuredExercises(form) {
 function exerciseRowHtml() {
   return `
     <div class="exercise-row" data-exercise-row>
-      <input data-exercise-name placeholder="Exercise name" maxlength="100" />
+      <div style="display: flex; gap: 8px; align-items: center; width: 100%;">
+        <input data-exercise-name list="exercise-options" placeholder="Exercise name" maxlength="100" style="flex: 1;" />
+        <div data-exercise-preview style="width: 40px; height: 40px; border-radius: var(--r-sm); overflow: hidden; display: none; background: #000; border: 1px solid var(--line); flex-shrink: 0; cursor: pointer;"></div>
+      </div>
       <div class="exercise-row-metrics">
         <input data-exercise-sets type="number" min="0" placeholder="Sets" />
         <input data-exercise-reps placeholder="Reps" maxlength="20" />

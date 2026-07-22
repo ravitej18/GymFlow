@@ -1,4 +1,4 @@
-import { dateLabel, emptyState, escapeHtml, findName, pageHeader, today } from "./utils.js";
+import { dateLabel, emptyState, escapeHtml, findName, pageHeader, today, getExercises, showExerciseModal } from "./utils.js";
 import { renderTemplateExercises } from "./workouts.js";
 
 export const myWorkoutModule = {
@@ -132,6 +132,21 @@ export const myWorkoutModule = {
   },
   bind(root) {
     bindBasicFilters(root);
+    getExercises();
+
+    root.addEventListener("click", async (event) => {
+      const item = event.target.closest(".clickable-exercise-item");
+      if (!item) return;
+      
+      const name = item.dataset.exerciseName;
+      if (!name) return;
+
+      const list = await getExercises();
+      const matched = list.find((ex) => ex.name.toLowerCase() === name.toLowerCase());
+      if (matched) {
+        showExerciseModal(matched);
+      }
+    });
   }
 };
 
