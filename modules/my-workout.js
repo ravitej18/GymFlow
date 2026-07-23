@@ -1,9 +1,5 @@
 import { collections, dateLabel, emptyState, escapeHtml, findName, pageHeader, today, getExercises, getExercisesList, showExerciseModal, withButtonLoading } from "./utils.js";
 import { renderTemplateExercises } from "./workouts.js";
-
-// Pre-fetch exercises database as soon as the module is loaded
-getExercises().catch(() => {});
-
 // Page state persisted in-memory on the singleton module object
 export const myWorkoutModule = {
   activeTab: "workouts", // "workouts" or "history"
