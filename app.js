@@ -91,7 +91,10 @@ const collectionNames = [
   "progress_records",
   "reminders",
   "trainer_attendance",
-  "membership_pauses"
+  "membership_pauses",
+  "exercise_library",
+  "workout_logs",
+  "workout_schedules"
 ];
 
 const state = {
