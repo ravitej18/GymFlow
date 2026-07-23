@@ -41,11 +41,9 @@ progress:
 | Phase | Name | Priority |
 |---|---|---|
 | 11 | Member Workout Logging & Exercise Library (Hevy-Style) | HIGH |
-| 12 | Analytics & Insights | MEDIUM |
-| 13 | Multi-Branch Support | MEDIUM |
-| 14 | Payment Gateway Integration | MEDIUM |
-| 15 | Advanced Operations | BACKLOG |
-| 16 | Implement PBL gamification strategy (points, badges, leaderboard, PRs, milestones) | MEDIUM |
+| 12 | Implement PBL gamification strategy (points, badges, leaderboard, PRs, milestones) | HIGH |
+| 13 | Analytics & Insights | MEDIUM |
+| 14 | Multi-Branch Support | MEDIUM |
 
 ## In-Progress Work
 
@@ -90,3 +88,4 @@ None currently.
 
 - Phase 11 edited: edited fields: title, goal, success_criteria to match Hevy-style requirements
 - Phase 16 added: Implement PBL gamification strategy (points, badges, leaderboard, PRs, milestones)
+- Phase 14 and 15 removed; re-sequenced remaining future phases to 12 (PBL), 13 (Analytics), and 14 (Multi-Branch)

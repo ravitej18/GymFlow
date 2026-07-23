@@ -18,10 +18,9 @@ GymFlow is a zero-cost, self-hosted gym management PWA. Phases build out the ful
 - [x] **Phase 10: Trainer Workout Module Library** — Trainers create reusable modules, publish Basic workouts for members, assign later to clients
 - [x] **Phase 10.1: Enhanced Member Intake Form & BMI Visual Meter** ⚡ URGENT NEXT — Full real-world intake fields, color-coded BMI horizontal meter, real-time duplicate phone/email detection, WhatsApp notification opt-in (completed 2026-07-23)
 - [ ] **Phase 11: Member Workout Logging & Exercise Library (Hevy-Style)** — Unrestricted workout logging, routine scheduling, last-week duplication, gym feed dashboard, search, and trainer/owner check.
-- [ ] **Phase 12: Analytics & Insights** — Revenue trends, member growth, attendance heatmap, forecasting
-- [ ] **Phase 13: Multi-Branch Support** — Branch entity, per-branch scoping, cross-branch dashboard
-- [ ] **Phase 14: Payment Gateway Integration** — Razorpay + Stripe, payment links, webhook auto-update
-- [ ] **Phase 15: Advanced Operations** — Bulk import, WhatsApp Business API, invoice PDF, audit log
+- [ ] **Phase 12: Implement PBL gamification strategy (points, badges, leaderboard, PRs, milestones)** — Gamify member workouts using points, custom badges, leaderboards per weight/gender/consistency, and PR milestones.
+- [ ] **Phase 13: Analytics & Insights** — Revenue trends, member growth, attendance heatmap, forecasting
+- [ ] **Phase 14: Multi-Branch Support** — Branch entity, per-branch scoping, cross-branch dashboard
 
 ## Phase Details
 
@@ -312,7 +311,23 @@ Plans:
 
 - [ ] 11-01: TBD
 
-### Phase 12: Analytics & Insights
+### Phase 12: Implement PBL gamification strategy (points, badges, leaderboard, PRs, milestones)
+
+**Goal**: Engage and motivate members using a gamification system (Points, Badges, Leaderboards, PRs) similar to Strava.
+**Depends on**: Phase 11
+**Status**: Not started
+**Success Criteria** (what must be TRUE):
+
+  1. Members earn points for completing workouts, check-ins, and hitting PRs.
+  2. Leaderboards are displayed on the dashboard, categorized by weight category, gender, and consistency (consecutive workouts).
+  3. Custom badges are unlocked automatically on hitting PRs, milestone workout counts (e.g. 50, 100, 250), or consistency streaks.
+  4. Members can see their PR achievements and unlocked badges in their member profile.
+
+Plans:
+
+- [ ] 12-01: TBD
+
+### Phase 13: Analytics & Insights
 
 **Goal**: Give gym owners actionable business intelligence to grow and retain members.
 **Depends on**: Phase 4
@@ -328,9 +343,9 @@ Plans:
 
 Plans:
 
-- [ ] 12-01: TBD
+- [ ] 13-01: TBD
 
-### Phase 13: Multi-Branch Support
+### Phase 14: Multi-Branch Support
 
 **Goal**: Allow a gym chain to manage multiple locations under one owner account.
 **Depends on**: Phase 5
@@ -345,40 +360,7 @@ Plans:
 
 Plans:
 
-- [ ] 13-01: TBD
-
-### Phase 14: Payment Gateway Integration
-
-**Goal**: Enable members to pay online; auto-update payment status without manual entry.
-**Depends on**: Phase 4
-**Status**: Not started
-**Success Criteria** (what must be TRUE):
-
-  1. Razorpay payment links can be generated per member/renewal
-  2. Stripe payment links work for international gyms
-  3. Webhook handler (Firebase Function) auto-updates payment status on success
-  4. Member sees payment link in My Payments
-
-Plans:
-
 - [ ] 14-01: TBD
-
-### Phase 15: Advanced Operations
-
-**Goal**: Operational efficiency and communication upgrades for larger gyms.
-**Depends on**: Phase 4
-**Status**: Not started
-**Success Criteria** (what must be TRUE):
-
-  1. Bulk member import from CSV/Excel works
-  2. WhatsApp Business API sends automated reminders
-  3. Invoice PDF generates with gym letterhead and itemized details
-  4. Custom reminder message templates work per gym
-  5. Audit log records change history with actor and timestamp
-
-Plans:
-
-- [ ] 15-01: TBD
 
 ## Progress
 
@@ -396,18 +378,6 @@ Plans:
 | 10 | Trainer Workout Module Library | 1/1 | Complete | — |
 | 10.1 | Enhanced Member Intake Form & BMI Visual Meter | 3/3 | Complete    | 2026-07-23 |
 | 11 | Member Workout Logging & Exercise Library (Hevy-Style) | 0/1 | Not started | — |
-| 12 | Analytics & Insights | 0/1 | Not started | - |
-| 13 | Multi-Branch Support | 0/1 | Not started | - |
-| 14 | Payment Gateway Integration | 0/1 | Not started | - |
-| 15 | Advanced Operations | 0/1 | Not started | - |
-
-### Phase 16: Implement PBL gamification strategy (points, badges, leaderboard, PRs, milestones)
-
-**Goal:** [To be planned]
-**Requirements**: TBD
-**Depends on:** Phase 15
-**Plans:** 0 plans
-
-Plans:
-
-- [ ] TBD (run /gsd-plan-phase 16 to break down)
+| 12 | Implement PBL gamification strategy (points, badges, leaderboard, PRs, milestones) | 0/1 | Not started | — |
+| 13 | Analytics & Insights | 0/1 | Not started | — |
+| 14 | Multi-Branch Support | 0/1 | Not started | — |
