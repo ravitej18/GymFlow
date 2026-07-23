@@ -16,7 +16,7 @@ progress:
 ## Current Status
 
 - **Milestone:** v0.9 Beta
-- **Active Branch:** `ui/dark-mode-animations-polish`
+- **Active Branch:** `phase/11-workout-logging`
 - **Last Phase Completed:** Phase 10.1 — Enhanced Member Intake Form & BMI Visual Meter
 - **Next Phase:** Phase 11 — Member Workout Logging & Exercise Library (Hevy-Style)
 
