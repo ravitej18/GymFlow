@@ -65,9 +65,9 @@ service cloud.firestore {
           && exists(/databases/$(database)/documents/gym_codes/$(request.resource.data.gymCodeUsed))
           && get(/databases/$(database)/documents/gym_codes/$(request.resource.data.gymCodeUsed)).data.gymId
                == request.resource.data.gymId
-        )
       );
-      allow update, delete: if owner();
+      allow update: if signedIn() && (uid() == userId || owner());
+      allow delete: if owner();
     }
 
     // Per-gym settings (doc id == gymId). Fixes the old shared "profile" doc

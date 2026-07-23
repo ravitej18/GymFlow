@@ -553,8 +553,9 @@ export const myWorkoutModule = {
       });
 
       const mySchedules = (context.data.workout_schedules || []).filter(s => s.memberId === me.id);
-      const weeklyScheduleDoc = mySchedules.find(s => s.type === "schedule") || { type: "schedule", memberId: me.id };
+      const weeklyScheduleDoc = mySchedules.find(s => s.type === "schedule") || { type: "schedule", memberId: me.id, gymId: me.gymId };
       weeklyScheduleDoc.schedule = scheduleObj;
+      weeklyScheduleDoc.gymId = me.gymId;
 
       await context.services.data.save(collections.workoutSchedules, weeklyScheduleDoc);
       context.toast("Schedule updated.");
@@ -811,6 +812,7 @@ export const myWorkoutModule = {
 
         const payload = {
           memberId: context.myMember.id,
+          gymId: context.myMember.gymId,
           date: today(),
           routineName: activeWorkout.routineName || "Workout",
           durationMinutes: durationMins,
@@ -894,6 +896,7 @@ export const myWorkoutModule = {
         bodyPart: data.get("bodyPart").trim() || "General",
         equipment: data.get("equipment").trim() || "None",
         createdByUid: context.profile.uid,
+        gymId: context.myMember.gymId,
         custom: true
       };
 
@@ -956,6 +959,7 @@ export const myWorkoutModule = {
         name,
         type: "routine",
         memberId: context.myMember.id,
+        gymId: context.myMember.gymId,
         exercisesStructured
       };
 
