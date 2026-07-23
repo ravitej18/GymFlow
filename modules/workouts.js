@@ -386,7 +386,8 @@ function card(template, context) {
   const meta = [template.category || "General", template.difficulty, template.equipment, template.durationMinutes ? `${template.durationMinutes} min` : ""]
     .filter(Boolean)
     .join(" / ");
-  const structuredSearch = (template.exercisesStructured || []).map((row) => Object.values(row).join(" ")).join(" ");
+  const rawStructured = typeof template.exercisesStructured === "string" ? JSON.parse(template.exercisesStructured) : (template.exercisesStructured || []);
+  const structuredSearch = (rawStructured || []).map((row) => Object.values(row).join(" ")).join(" ");
   const search = [template.name, template.goal, template.category, template.difficulty, template.equipment, template.exercises, template.notes, structuredSearch]
     .filter(Boolean)
     .join(" ")

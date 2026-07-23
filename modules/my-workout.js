@@ -1156,12 +1156,13 @@ function startWorkoutFromRoutine(routine) {
 }
 
 function startWorkoutFromTemplate(template) {
+  const rawStructured = typeof template.exercisesStructured === "string" ? JSON.parse(template.exercisesStructured) : (template.exercisesStructured || []);
   const active = {
     startTime: new Date().toISOString(),
     routineName: template.name,
     notes: "",
     private: false,
-    exercises: (template.exercisesStructured || []).map(ex => {
+    exercises: (rawStructured || []).map(ex => {
       const setsCount = Number(ex.sets) || 1;
       const sets = [];
       for (let i = 0; i < setsCount; i++) {
@@ -1197,7 +1198,8 @@ function basicCard(template) {
     .filter(Boolean)
     .join(" / ");
   
-  const structuredSearch = (template.exercisesStructured || []).map((row) => Object.values(row).join(" ")).join(" ");
+  const rawStructured = typeof template.exercisesStructured === "string" ? JSON.parse(template.exercisesStructured) : (template.exercisesStructured || []);
+  const structuredSearch = (rawStructured || []).map((row) => Object.values(row).join(" ")).join(" ");
   const search = [template.name, template.goal, template.category, template.difficulty, template.equipment, template.exercises, template.notes, structuredSearch]
     .filter(Boolean)
     .join(" ")
