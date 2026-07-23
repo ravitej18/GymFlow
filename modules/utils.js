@@ -10,7 +10,10 @@ export const collections = {
   progress: "progress_records",
   reminders: "reminders",
   trainerAttendance: "trainer_attendance",
-  membershipPauses: "membership_pauses"
+  membershipPauses: "membership_pauses",
+  exerciseLibrary: "exercise_library",
+  workoutLogs: "workout_logs",
+  workoutSchedules: "workout_schedules"
 };
 
 export function escapeHtml(value = "") {
@@ -367,6 +370,159 @@ export function showExerciseModal(exercise) {
   });
   overlay.querySelector("[data-modal='close']").addEventListener("click", close);
   document.addEventListener("keydown", onKey);
+  document.body.appendChild(overlay);
+}
+
+export function showMemberProfileModal(member, context) {
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  overlay.style.display = "flex";
+  overlay.style.alignItems = "center";
+  overlay.style.justifyContent = "center";
+
+  const plans = context.data.membership_plans || [];
+  const trainers = context.data.trainers || [];
+  const logs = (context.data.workout_logs || [])
+    .filter(l => l.memberId === member.id)
+    .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+
+  const planName = findName(plans, member.planId);
+  const trainerName = findName(trainers, member.assignedTrainer, "Unassigned");
+  const avatarInitials = (member.fullName || "M").split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase() || "M";
+
+  overlay.innerHTML = `
+    <div class="modal stack" role="dialog" aria-modal="true" style="width: min(650px, 95%); max-height: 85vh; display: flex; flex-direction: column; padding: 20px;">
+      <div class="panel-heading" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 12px;">
+        <div style="display:flex; gap:12px; align-items:center;">
+          <div class="avatar" style="width:44px; height:44px; border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.1rem;">
+            ${avatarInitials}
+          </div>
+          <div>
+            <h2 style="margin: 0; font-size: 1.25rem;">${escapeHtml(member.fullName)}</h2>
+            <small style="opacity: 0.85;">${escapeHtml(planName)} • Trainer: ${escapeHtml(trainerName)}</small>
+          </div>
+        </div>
+        <button class="ghost-button" data-modal="close" style="min-width: unset; padding: 4px; border: none; background: transparent; cursor: pointer;" title="Close">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="tabs-header modal-tabs" style="margin-bottom: 12px;">
+        <button class="tab-btn active" data-modal-tab="info">Bio & Medical</button>
+        <button class="tab-btn" data-modal-tab="logs">Workout Logs (${logs.length})</button>
+      </div>
+
+      <div style="flex: 1; overflow-y: auto; display:flex; flex-direction:column; gap: 15px;" id="modal-tab-content">
+        <!-- Tab contents dynamic -->
+      </div>
+    </div>
+  `;
+
+  const contentEl = overlay.querySelector("#modal-tab-content");
+  let activeTab = "info";
+
+  function renderTab() {
+    if (activeTab === "info") {
+      contentEl.innerHTML = `
+        <div class="stack" style="gap: 15px;">
+          <section class="stack" style="gap: 8px;">
+            <h3 style="margin:0; border-bottom: 1px solid var(--line); padding-bottom:4px; font-size: 1rem; color:var(--accent);">Personal Info</h3>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:0.9rem;">
+              <span><strong>Email:</strong> ${escapeHtml(member.email || "—")}</span>
+              <span><strong>Mobile:</strong> ${escapeHtml(member.mobile || "—")}</span>
+              <span><strong>Gender:</strong> ${escapeHtml(member.gender || "—")}</span>
+              <span><strong>DOB:</strong> ${escapeHtml(member.dateOfBirth ? dateLabel(member.dateOfBirth) : "—")}</span>
+              <span style="grid-column: span 2;"><strong>Address:</strong> ${escapeHtml(member.address || "—")}</span>
+            </div>
+          </section>
+
+          <section class="stack" style="gap: 8px;">
+            <h3 style="margin:0; border-bottom: 1px solid var(--line); padding-bottom:4px; font-size: 1rem; color:var(--accent);">Emergency Contact</h3>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:0.9rem;">
+              <span><strong>Name:</strong> ${escapeHtml(member.emergencyName || "—")}</span>
+              <span><strong>Relationship:</strong> ${escapeHtml(member.emergencyRelationship || "—")}</span>
+              <span><strong>Phone:</strong> ${escapeHtml(member.emergencyPhone || "—")}</span>
+            </div>
+          </section>
+
+          <section class="stack" style="gap: 8px;">
+            <h3 style="margin:0; border-bottom: 1px solid var(--line); padding-bottom:4px; font-size: 1rem; color:var(--accent);">Background & Metrics</h3>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:0.9rem;">
+              <span><strong>Blood Group:</strong> ${escapeHtml(member.bloodGroup || "—")}</span>
+              <span><strong>Occupation:</strong> ${escapeHtml(member.occupation || "—")}</span>
+              <span><strong>Activity Level:</strong> ${escapeHtml(member.activityLevel || "—")}</span>
+              <span><strong>Experience:</strong> ${escapeHtml(member.fitnessExperience || "—")}</span>
+              <span><strong>Gym Goal:</strong> ${escapeHtml(member.gymGoal || "—")}</span>
+              <span><strong>WhatsApp Consent:</strong> ${member.whatsappOptIn ? "Yes" : "No"}</span>
+            </div>
+          </section>
+
+          <section class="stack" style="gap: 8px;">
+            <h3 style="margin:0; border-bottom: 1px solid var(--line); padding-bottom:4px; font-size: 1rem; color:var(--accent);">Health & Medical</h3>
+            <div style="display:flex; flex-direction:column; gap:8px; font-size:0.9rem;">
+              <div><strong>Medical Conditions:</strong><p style="margin:4px 0; opacity:0.9;">${escapeHtml(member.medicalConditions || "None declared")}</p></div>
+              <div><strong>Current Medications:</strong><p style="margin:4px 0; opacity:0.9;">${escapeHtml(member.currentMedications || "None")}</p></div>
+              <div><strong>Allergies:</strong><p style="margin:4px 0; opacity:0.9;">${escapeHtml(member.allergies || "None")}</p></div>
+              <div><strong>Limitations / Injuries:</strong><p style="margin:4px 0; opacity:0.9;">${escapeHtml(member.physicalLimitations || "None")}</p></div>
+            </div>
+          </section>
+        </div>
+      `;
+    } else {
+      contentEl.innerHTML = `
+        <div class="stack" style="gap: 12px;">
+          ${logs.length 
+            ? logs.map(log => `
+                <div class="panel" style="padding:12px; border:1px solid var(--line); border-radius:var(--r-md); background:var(--bg-alt);">
+                  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--line); padding-bottom:4px; margin-bottom:8px;">
+                    <strong style="font-size:1rem; color:var(--accent);">${escapeHtml(log.routineName || "Workout")}</strong>
+                    <small style="opacity:0.8;">${dateLabel(log.date)} • ${log.durationMinutes || 0} mins</small>
+                  </div>
+                  ${log.notes ? `<p style="font-style:italic; font-size:0.85rem; margin:4px 0;">"${escapeHtml(log.notes)}"</p>` : ""}
+                  <div style="margin-top:6px; display:flex; flex-direction:column; gap:4px;">
+                    ${(log.exercises || []).map(ex => `
+                      <div style="font-size:0.85rem;">
+                        <strong>${escapeHtml(ex.name)}</strong>
+                        <span style="opacity:0.8; padding-left:6px;">
+                          ${(ex.sets || []).map((s, idx) => `${idx + 1}: ${s.weight}kg x ${s.reps}`).join(" / ")}
+                        </span>
+                      </div>
+                    `).join("")}
+                  </div>
+                </div>
+              `).join("")
+            : `<div class="table-empty">No workouts logged yet.</div>`
+          }
+        </div>
+      `;
+    }
+  }
+
+  // Bind Tab clicks
+  overlay.querySelectorAll("[data-modal-tab]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      overlay.querySelectorAll("[data-modal-tab]").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      activeTab = btn.dataset.modalTab;
+      renderTab();
+    });
+  });
+
+  function close() {
+    document.removeEventListener("keydown", onKey);
+    overlay.remove();
+  }
+  function onKey(event) {
+    if (event.key === "Escape") close();
+  }
+
+  overlay.addEventListener("click", (event) => {
+    if (event.target === overlay) close();
+  });
+  overlay.querySelector("[data-modal='close']").addEventListener("click", close);
+  document.addEventListener("keydown", onKey);
+
+  renderTab();
   document.body.appendChild(overlay);
 }
 

@@ -65,9 +65,9 @@ service cloud.firestore {
           && exists(/databases/$(database)/documents/gym_codes/$(request.resource.data.gymCodeUsed))
           && get(/databases/$(database)/documents/gym_codes/$(request.resource.data.gymCodeUsed)).data.gymId
                == request.resource.data.gymId
-        )
       );
-      allow update, delete: if owner();
+      allow update: if signedIn() && (uid() == userId || owner());
+      allow delete: if owner();
     }
 
     // Per-gym settings (doc id == gymId). Fixes the old shared "profile" doc
@@ -215,6 +215,79 @@ service cloud.firestore {
       );
       allow update: if (owner() || myRole() == "trainer") && sameGym() && incomingSameGym();
       allow delete: if owner() && sameGym();
+    }
+
+    match /exercise_library/{docId} {
+      allow read: if sameGym();
+      allow create: if incomingSameGym() && (
+        owner()
+        || myRole() == "trainer"
+        || (myRole() == "member" && request.resource.data.createdByUid == uid())
+      );
+      allow update: if sameGym() && incomingSameGym() && (
+        owner()
+        || (resource.data.createdByUid == uid())
+      );
+      allow delete: if sameGym() && (
+        owner()
+        || (resource.data.createdByUid == uid())
+      );
+    }
+
+    match /workout_logs/{docId} {
+      allow read: if sameGym();
+      allow create: if incomingSameGym() && (
+        owner()
+        || (
+          myRole() == "member"
+          && exists(/databases/$(database)/documents/members/$(request.resource.data.memberId))
+          && get(/databases/$(database)/documents/members/$(request.resource.data.memberId)).data.uid == uid()
+        )
+      );
+      allow update: if sameGym() && incomingSameGym() && (
+        owner()
+        || (
+          myRole() == "member"
+          && exists(/databases/$(database)/documents/members/$(resource.data.memberId))
+          && get(/databases/$(database)/documents/members/$(resource.data.memberId)).data.uid == uid()
+        )
+      );
+      allow delete: if sameGym() && (
+        owner()
+        || (
+          myRole() == "member"
+          && exists(/databases/$(database)/documents/members/$(resource.data.memberId))
+          && get(/databases/$(database)/documents/members/$(resource.data.memberId)).data.uid == uid()
+        )
+      );
+    }
+
+    match /workout_schedules/{docId} {
+      allow read: if sameGym();
+      allow create: if incomingSameGym() && (
+        owner()
+        || (
+          myRole() == "member"
+          && exists(/databases/$(database)/documents/members/$(request.resource.data.memberId))
+          && get(/databases/$(database)/documents/members/$(request.resource.data.memberId)).data.uid == uid()
+        )
+      );
+      allow update: if sameGym() && incomingSameGym() && (
+        owner()
+        || (
+          myRole() == "member"
+          && exists(/databases/$(database)/documents/members/$(resource.data.memberId))
+          && get(/databases/$(database)/documents/members/$(resource.data.memberId)).data.uid == uid()
+        )
+      );
+      allow delete: if sameGym() && (
+        owner()
+        || (
+          myRole() == "member"
+          && exists(/databases/$(database)/documents/members/$(resource.data.memberId))
+          && get(/databases/$(database)/documents/members/$(resource.data.memberId)).data.uid == uid()
+        )
+      );
     }
 
     // Everything else (plans, payments, progress, workouts, reminders):

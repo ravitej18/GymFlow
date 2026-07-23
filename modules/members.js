@@ -1,4 +1,4 @@
-import { addDays, byName, collections, confirmDialog, dateLabel, emptyState, escapeHtml, findName, formData, memberStatus, nameCell, optionList, pageHeader, statusClass, today, withButtonLoading } from "./utils.js";
+import { addDays, byName, collections, confirmDialog, dateLabel, emptyState, escapeHtml, findName, formData, memberStatus, nameCell, optionList, pageHeader, showMemberProfileModal, statusClass, today, withButtonLoading } from "./utils.js";
 
 function calcBmi(weightKg, heightCm) {
   const w = parseFloat(weightKg);
@@ -427,6 +427,15 @@ export const membersModule = {
 
     bindFilters(root);
 
+    root.querySelectorAll("[data-view-member]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const member = context.data.members.find((item) => item.id === button.dataset.viewMember);
+        if (member) {
+          showMemberProfileModal(member, context);
+        }
+      });
+    });
+
     root.querySelectorAll("[data-edit-member]").forEach((button) => {
       button.addEventListener("click", () => {
         const member = context.data.members.find((item) => item.id === button.dataset.editMember);
@@ -693,6 +702,7 @@ function row(member, plans, trainers) {
             ? `<button class="icon-button" data-resume-member="${escapeHtml(member.id)}" title="Resume membership"><span class="material-symbols-outlined">play_circle</span></button>`
             : ""
         }
+        <button class="icon-button" data-view-member="${escapeHtml(member.id)}" title="View profile & logs"><span class="material-symbols-outlined">visibility</span></button>
         <button class="icon-button" data-edit-member="${escapeHtml(member.id)}" title="Edit"><span class="material-symbols-outlined">edit</span></button>
         <button class="icon-button danger" data-delete-member="${escapeHtml(member.id)}" title="Delete"><span class="material-symbols-outlined">delete</span></button>
       </span>

@@ -2,14 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-last_updated: "2026-06-21T08:53:45.029Z"
+status: planning
+last_updated: "2026-07-23T03:19:37.946Z"
 progress:
-  total_phases: 15
-  completed_phases: 0
-  total_plans: 3
-  completed_plans: 0
-  percent: 0
+  total_phases: 5
+  completed_phases: 5
+  total_plans: 10
+  completed_plans: 10
 ---
 
 # GymFlow — Project State
@@ -17,9 +16,9 @@ progress:
 ## Current Status
 
 - **Milestone:** v0.9 Beta
-- **Active Branch:** `ui/dark-mode-animations-polish`
-- **Last Phase Completed:** Phase 10 — Trainer Workout Module Library
-- **Next Phase:** Phase 10.1 — Enhanced Member Intake Form & BMI Visual Meter ⚡ URGENT
+- **Active Branch:** `phase/11-workout-logging`
+- **Last Phase Completed:** Phase 10.1 — Enhanced Member Intake Form & BMI Visual Meter
+- **Next Phase:** Phase 11 — Member Workout Logging & Exercise Library (Hevy-Style)
 
 ## Completed Phases
 
@@ -35,23 +34,22 @@ progress:
 | 8 | Member Portal v2 | main | — |
 | 9 | Membership Pause & Freeze | main | — |
 | 10 | Trainer Workout Module Library | main (#12) | — |
+| 10.1 | Enhanced Member Intake Form & BMI Visual Meter | main | 2026-07-23 |
 
 ## Upcoming Phases (Priority Order)
 
 | Phase | Name | Priority |
 |---|---|---|
-| 10.1 | Enhanced Member Intake Form & BMI Visual Meter | URGENT NEXT |
-| 11 | Member Workout Logging & Exercise Library | HIGH |
-| 12 | Analytics & Insights | MEDIUM |
-| 13 | Multi-Branch Support | MEDIUM |
-| 14 | Payment Gateway Integration | MEDIUM |
-| 15 | Advanced Operations | BACKLOG |
+| 11 | Member Workout Logging & Exercise Library (Hevy-Style) | HIGH |
+| 12 | Implement PBL gamification strategy (points, badges, leaderboard, PRs, milestones) | HIGH |
+| 13 | Analytics & Insights | MEDIUM |
+| 14 | Multi-Branch Support | MEDIUM |
 
 ## In-Progress Work
 
 - **Branch:** `main`
 - **Last merged commit:** `517a3ff` — Add trainer workout module library and basic member workouts (#12)
-- **Status:** Phase 10 complete; Phase 10.1 not yet started
+- **Status:** Ready to plan
 
 ## Key Architectural Facts
 
@@ -83,3 +81,11 @@ None currently.
 - Phase 9 introduces new Firestore collection: `membership_pauses`
 - Phase 10 reuses `workout_templates` with trainer ownership and visibility metadata
 - Phase 11 introduces new Firestore collections: `exercise_library`, `workout_logs`, `workout_log_entries`
+
+## Accumulated Context
+
+### Roadmap Evolution
+
+- Phase 11 edited: edited fields: title, goal, success_criteria to match Hevy-style requirements
+- Phase 16 added: Implement PBL gamification strategy (points, badges, leaderboard, PRs, milestones)
+- Phase 14 and 15 removed; re-sequenced remaining future phases to 12 (PBL), 13 (Analytics), and 14 (Multi-Branch)

@@ -1617,3 +1617,177 @@ code { padding: 2px 6px; border-radius: 5px; background: var(--surface-strong); 
   .bar-item strong { display: none; }
   .primary-button, .ghost-button, .link-button, .file-button { width: 100%; justify-content: center; }
 }
+
+/* ===================================================================
+   PHASE 11 — Member Workout Logging & Exercise Library
+   =================================================================== */
+
+.tabs-header {
+  display: flex;
+  gap: 8px;
+  border-bottom: 2px solid var(--line);
+  margin-bottom: 20px;
+  padding-bottom: 4px;
+}
+
+.tabs-header .tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 8px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: -6px;
+  transition: all var(--dur-micro) var(--ease-out);
+}
+
+.tabs-header .tab-btn:hover {
+  color: var(--ink);
+}
+
+.tabs-header .tab-btn.active {
+  color: var(--accent, var(--primary-strong));
+  border-bottom-color: var(--accent, var(--primary-strong));
+}
+
+.schedule-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.schedule-day-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+}
+
+.schedule-day-row .day-name {
+  font-weight: 700;
+  width: 90px;
+}
+
+.schedule-day-row .routine-name {
+  flex: 1;
+  font-size: 0.95rem;
+  padding-left: 10px;
+}
+
+.schedule-day-row .routine-name.rest-day {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.schedule-day-row .routine-name.has-routine {
+  color: var(--accent, var(--primary-strong));
+  font-weight: 600;
+}
+
+.active-workout-header {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 15px 20px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow);
+}
+
+.active-timer {
+  font-family: monospace;
+  font-size: 1.5rem;
+  letter-spacing: 0.5px;
+}
+
+.active-set-row {
+  transition: background var(--dur-micro) var(--ease-out);
+}
+
+.active-set-row.set-done {
+  background: rgba(22, 163, 74, 0.1) !important;
+}
+
+.active-set-row input, .active-set-row select {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xs);
+  color: var(--ink);
+}
+
+.active-set-row.set-done input, .active-set-row.set-done select {
+  border-color: rgba(22, 163, 74, 0.4);
+}
+
+.feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.feed-item {
+  box-shadow: var(--shadow-card);
+  transition: transform var(--dur-micro) var(--ease-out);
+}
+
+.feed-item:hover {
+  transform: translateY(-1px);
+}
+
+.avatar-circle {
+  font-family: Inter, sans-serif;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--r-xs);
+  text-transform: uppercase;
+}
+
+.badge.private {
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}
+
+.badge.public {
+  background: var(--primary-fade);
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+
+.modal-tabs {
+  border-bottom: 1px solid var(--line);
+}
+
+.modal-tabs .tab-btn {
+  font-size: 0.9rem;
+  padding: 6px 12px;
+}
+
+@media (max-width: 768px) {
+  .schedule-day-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  
+  .schedule-day-row .routine-name {
+    padding-left: 0;
+  }
+  
+  .schedule-day-row button {
+    width: 100%;
+  }
+}

@@ -17,7 +17,7 @@ import { myPaymentsModule } from "./modules/my-payments.js";
 import { trainerCheckinModule } from "./modules/trainer-checkin.js";
 import { trainerMembersModule } from "./modules/trainer-members.js";
 import { myWorkoutModule } from "./modules/my-workout.js";
-import { CARTOON_AVATARS, escapeHtml } from "./modules/utils.js";
+import { CARTOON_AVATARS, escapeHtml, getExercises } from "./modules/utils.js";
 
 const appRoot = document.querySelector("#app");
 
@@ -91,7 +91,10 @@ const collectionNames = [
   "progress_records",
   "reminders",
   "trainer_attendance",
-  "membership_pauses"
+  "membership_pauses",
+  "exercise_library",
+  "workout_logs",
+  "workout_schedules"
 ];
 
 const state = {
@@ -111,6 +114,7 @@ boot();
 async function boot() {
   state.services = await createServices(window.GYM_CONFIG || {});
   registerServiceWorker();
+  getExercises().catch(() => {});
 
   window.addEventListener("hashchange", () => {
     state.route = getRoute();

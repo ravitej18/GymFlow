@@ -61,6 +61,7 @@ export const dashboardModule = {
           ${renderBars(payments, currency)}
         </section>
       </div>
+      ${renderCommunityFeed(context)}
     `;
   }
 };
@@ -116,6 +117,7 @@ function renderMemberDashboard(context) {
              <a class="primary-button" href="#/attendance"><span class="material-symbols-outlined">how_to_reg</span>Check in now</a>`
       }
     </section>
+    ${renderCommunityFeed(context)}
   `;
 }
 
@@ -158,6 +160,7 @@ function renderTrainerDashboard(context) {
              <a class="primary-button" href="#/trainer-checkin"><span class="material-symbols-outlined">how_to_reg</span>Check in now</a>`
       }
     </section>
+    ${renderCommunityFeed(context)}
   `;
 }
 
@@ -196,5 +199,70 @@ function renderBars(payments, currency) {
         )
         .join("")}
     </div>
+  `;
+}
+
+function renderCommunityFeed(context) {
+  const logs = context.data.workout_logs || [];
+  const members = context.data.members || [];
+  
+  // Filter for only public logs (private === false)
+  const publicLogs = logs
+    .filter(l => !l.private)
+    .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))
+    .slice(0, 10);
+
+  const findMember = (memberId) => {
+    return members.find(m => m.id === memberId) || { fullName: "Gym Member" };
+  };
+
+  return `
+    <section class="panel stack" style="margin-top: 20px;">
+      <div class="panel-heading">
+        <h2>Gym Community Feed</h2>
+        <span>Latest Member Activity</span>
+      </div>
+      ${publicLogs.length 
+        ? `<div class="feed-list stack" style="gap: 12px; margin-top: 10px;">
+            ${publicLogs.map(log => {
+              const member = findMember(log.memberId);
+              const initials = (member.fullName || "M").split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase() || "M";
+              const exercises = log.exercises || [];
+              
+              return `
+                <div class="feed-item" style="display:flex; flex-direction:column; gap:8px; padding:12px; border:1px solid var(--line); border-radius:var(--r-md); background:var(--bg-alt);">
+                  <div style="display:flex; gap:10px; align-items:center;">
+                    <div class="avatar-circle" style="width:36px; height:36px; border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.9rem;">
+                      ${initials}
+                    </div>
+                    <div>
+                      <strong style="font-size:0.95rem; color:var(--text);">${escapeHtml(member.fullName)}</strong>
+                      <div style="font-size:0.75rem; opacity:0.8; color:var(--text-muted);">${dateLabel(log.date)}</div>
+                    </div>
+                  </div>
+                  
+                  <div style="padding-left:46px;">
+                    <h4 style="margin:0 0 4px 0; color:var(--accent); font-size:1rem;">${escapeHtml(log.routineName || "Workout")}</h4>
+                    <small style="opacity:0.9; font-weight:600; font-size:0.8rem;">Duration: ${log.durationMinutes || 0} mins</small>
+                    ${log.notes ? `<p style="font-style:italic; font-size:0.85rem; margin:4px 0; opacity:0.95;">"${escapeHtml(log.notes)}"</p>` : ""}
+                    
+                    <div style="margin-top:6px; display:flex; flex-direction:column; gap:2px; border-top:1px solid var(--line); padding-top:6px;">
+                      ${exercises.map(ex => `
+                        <div style="font-size:0.85rem; margin-top:2px;">
+                          <strong>${escapeHtml(ex.name)}</strong>
+                          <span style="opacity:0.8; padding-left:8px;">
+                            ${(ex.sets || []).map((s, idx) => `${idx + 1}: ${s.weight}kg x ${s.reps}`).join(" / ")}
+                          </span>
+                        </div>
+                      `).join("")}
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join("")}
+           </div>`
+        : `<div class="table-empty">No workouts shared in the community feed yet.</div>`
+      }
+    </section>
   `;
 }

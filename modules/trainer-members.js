@@ -1,4 +1,4 @@
-import { collections, dateLabel, emptyState, escapeHtml, findName, formData, optionList, pageHeader, today, withButtonLoading } from "./utils.js";
+import { collections, dateLabel, emptyState, escapeHtml, findName, formData, optionList, pageHeader, showMemberProfileModal, today, withButtonLoading } from "./utils.js";
 import { canUseWorkoutTemplate, renderTemplateExercises } from "./workouts.js";
 
 export const trainerMembersModule = {
@@ -177,6 +177,15 @@ export const trainerMembersModule = {
         updatePreview(root, templates, "bulk", "");
       }, "Assigning...");
     });
+
+    root.querySelectorAll(".view-client-btn").forEach((button) => {
+      button.addEventListener("click", () => {
+        const member = context.data.members.find((item) => item.id === button.dataset.clientId);
+        if (member) {
+          showMemberProfileModal(member, context);
+        }
+      });
+    });
   }
 };
 
@@ -213,11 +222,16 @@ function modulePreview(template) {
 function memberCard(member, templateName, templates) {
   return `
     <article class="item-card" data-client-card>
-      <div>
-        <strong>${escapeHtml(member.fullName)}</strong>
-        <span>${escapeHtml(member.goal || "General")}</span>
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div>
+          <strong style="font-size:1.1rem; display:block;">${escapeHtml(member.fullName)}</strong>
+          <span style="font-size:0.85rem; opacity:0.8;">${escapeHtml(member.goal || "General")}</span>
+        </div>
+        <button class="icon-button view-client-btn" data-client-id="${escapeHtml(member.id)}" type="button" title="View profile & logs">
+          <span class="material-symbols-outlined">visibility</span>
+        </button>
       </div>
-      <p>${escapeHtml(templateName)}</p>
+      <p style="margin-top:10px;">${escapeHtml(templateName)}</p>
       <div class="stack">
         <select data-template-select="${escapeHtml(member.id)}">
           <option value="">Select module...</option>

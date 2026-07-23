@@ -21,3 +21,6 @@ Thumbs.db
 
 # Gym configuration containing sensitive firebase keys
 gym.config.js
+
+# Temporary developer seeding utilities
+seed.html
