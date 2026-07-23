@@ -1,6 +1,9 @@
 import { collections, dateLabel, emptyState, escapeHtml, findName, pageHeader, today, getExercises, getExercisesList, showExerciseModal, withButtonLoading } from "./utils.js";
 import { renderTemplateExercises } from "./workouts.js";
 
+// Pre-fetch exercises database as soon as the module is loaded
+getExercises().catch(() => {});
+
 // Page state persisted in-memory on the singleton module object
 export const myWorkoutModule = {
   activeTab: "workouts", // "workouts" or "history"
@@ -87,12 +90,16 @@ export const myWorkoutModule = {
                 <label>${day}
                   <select name="${day}">
                     <option value="">Rest Day</option>
+                    ${customRoutines.length ? `
                     <optgroup label="Custom Routines">
                       ${customRoutines.map(r => `<option value="${r.id}" ${currentVal === r.id ? "selected" : ""}>${escapeHtml(r.name)}</option>`).join("")}
                     </optgroup>
+                    ` : ""}
+                    ${basicTemplates.length ? `
                     <optgroup label="Gym Templates">
                       ${basicTemplates.map(t => `<option value="${t.id}" ${currentVal === t.id ? "selected" : ""}>${escapeHtml(t.name)}</option>`).join("")}
                     </optgroup>
+                    ` : ""}
                   </select>
                 </label>
               `;
@@ -322,7 +329,11 @@ export const myWorkoutModule = {
             </div>
 
             <div style="flex:1; overflow-y:auto; padding:10px;" id="search-results-list">
-              ${searchList.map(ex => `
+              ${searchList.length === 0 ? `
+                <div style="text-align:center; padding:30px; opacity:0.7;">
+                  <p>Loading exercises library...</p>
+                </div>
+              ` : searchList.map(ex => `
                 <div class="search-exercise-row select-exercise-row" data-name="${escapeHtml(ex.name)}" style="display:flex; align-items:center; justify-content:space-between; padding:8px; border-bottom:1px solid var(--line); cursor:pointer; hover:background:var(--bg-alt);">
                   <div>
                     <strong>${escapeHtml(ex.name)}</strong>
@@ -375,7 +386,7 @@ export const myWorkoutModule = {
             <span class="active-timer" id="active-timer" style="font-size:1.4rem; font-weight:700; color:var(--accent);">00:00:00</span>
           </div>
           <div style="display:flex; gap:10px;">
-            <button class="primary-button compact" id="finish-workout-btn" style="background: var(--green);">Finish</button>
+            <button class="primary-button compact" id="finish-workout-btn" style="background: #16a34a; color: white;">Finish</button>
             <button class="ghost-button danger compact" id="cancel-workout-btn">Cancel</button>
           </div>
         </div>
@@ -673,6 +684,12 @@ export const myWorkoutModule = {
 
   // Active workout bindings
   bindActiveLogger(root, context, activeWorkout) {
+    if (this.exerciseSearchOpen && getExercisesList().length === 0) {
+      getExercises().then(() => {
+        context.refreshView();
+      }).catch(() => {});
+    }
+
     // Start active timer UI refresh
     this.startActiveTimer(root, activeWorkout.startTime);
 
@@ -1000,9 +1017,6 @@ export const myWorkoutModule = {
     context.toast("Select an exercise from the library.");
     this.exerciseSearchOpen = false; // reset
     
-    // We will render a quick list selection using showExerciseSelectPrompt
-    const list = getExercisesList().sort((a, b) => a.name.localeCompare(b.name));
-    
     const overlay = document.createElement("div");
     overlay.className = "modal-overlay";
     overlay.style.display = "flex";
@@ -1019,36 +1033,47 @@ export const myWorkoutModule = {
           <input type="search" id="builder-ex-search-input" placeholder="Search exercises..." style="width:100%;" />
         </div>
         <div style="flex:1; overflow-y:auto; padding:10px;" id="builder-results-list">
-          ${list.map(ex => `
-            <div class="select-ex-row" data-name="${escapeHtml(ex.name)}" style="padding:10px; border-bottom:1px solid var(--line); cursor:pointer;">
-              <strong>${escapeHtml(ex.name)}</strong>
-            </div>
-          `).join("")}
+          <p style="text-align:center; padding:20px; opacity:0.7;">Loading exercises...</p>
         </div>
       </div>
     `;
     
     document.body.appendChild(overlay);
     
-    // Bind search typing
+    const resultsList = overlay.querySelector("#builder-results-list");
     const inp = overlay.querySelector("#builder-ex-search-input");
     inp.focus();
-    inp.addEventListener("input", () => {
-      const term = inp.value.trim().toLowerCase();
+
+    const bindListEvents = (list) => {
+      resultsList.innerHTML = list.map(ex => `
+        <div class="select-ex-row" data-name="${escapeHtml(ex.name)}" style="padding:10px; border-bottom:1px solid var(--line); cursor:pointer;">
+          <strong>${escapeHtml(ex.name)}</strong>
+        </div>
+      `).join("");
+
       overlay.querySelectorAll(".select-ex-row").forEach(row => {
-        const name = row.dataset.name.toLowerCase();
-        row.style.display = name.includes(term) ? "block" : "none";
+        row.addEventListener("click", () => {
+          const name = row.dataset.name;
+          this.editingRoutine.exercisesStructured.push({ name, sets: "3", reps: "10", weight: "", rest: "", notes: "" });
+          overlay.remove();
+          context.refreshView();
+        });
       });
-    });
-    
-    // Bind selection
-    overlay.querySelectorAll(".select-ex-row").forEach(row => {
-      row.addEventListener("click", () => {
-        const name = row.dataset.name;
-        this.editingRoutine.exercisesStructured.push({ name, sets: "3", reps: "10", weight: "", rest: "", notes: "" });
-        overlay.remove();
-        context.refreshView();
+    };
+
+    getExercises().then(list => {
+      const sorted = list.sort((a, b) => a.name.localeCompare(b.name));
+      bindListEvents(sorted);
+      
+      inp.addEventListener("input", () => {
+        const term = inp.value.trim().toLowerCase();
+        overlay.querySelectorAll(".select-ex-row").forEach(row => {
+          const name = row.dataset.name.toLowerCase();
+          row.style.display = name.includes(term) ? "block" : "none";
+        });
       });
+    }).catch(() => {
+      resultsList.innerHTML = '<p style="text-align:center; padding:20px; color:var(--red);">Failed to load exercises.</p>';
     });
     
     overlay.querySelector(".close-builder-prompt-btn").addEventListener("click", () => {

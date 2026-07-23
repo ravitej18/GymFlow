@@ -17,7 +17,7 @@ import { myPaymentsModule } from "./modules/my-payments.js";
 import { trainerCheckinModule } from "./modules/trainer-checkin.js";
 import { trainerMembersModule } from "./modules/trainer-members.js";
 import { myWorkoutModule } from "./modules/my-workout.js";
-import { CARTOON_AVATARS, escapeHtml } from "./modules/utils.js";
+import { CARTOON_AVATARS, escapeHtml, getExercises } from "./modules/utils.js";
 
 const appRoot = document.querySelector("#app");
 
@@ -114,6 +114,7 @@ boot();
 async function boot() {
   state.services = await createServices(window.GYM_CONFIG || {});
   registerServiceWorker();
+  getExercises().catch(() => {});
 
   window.addEventListener("hashchange", () => {
     state.route = getRoute();
