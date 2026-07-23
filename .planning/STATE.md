@@ -45,6 +45,7 @@ progress:
 | 13 | Multi-Branch Support | MEDIUM |
 | 14 | Payment Gateway Integration | MEDIUM |
 | 15 | Advanced Operations | BACKLOG |
+| 16 | Implement PBL gamification strategy (points, badges, leaderboard, PRs, milestones) | MEDIUM |
 
 ## In-Progress Work
 
@@ -88,3 +89,4 @@ None currently.
 ### Roadmap Evolution
 
 - Phase 11 edited: edited fields: title, goal, success_criteria to match Hevy-style requirements
+- Phase 16 added: Implement PBL gamification strategy (points, badges, leaderboard, PRs, milestones)

@@ -400,3 +400,14 @@ Plans:
 | 13 | Multi-Branch Support | 0/1 | Not started | - |
 | 14 | Payment Gateway Integration | 0/1 | Not started | - |
 | 15 | Advanced Operations | 0/1 | Not started | - |
+
+### Phase 16: Implement PBL gamification strategy (points, badges, leaderboard, PRs, milestones)
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 15
+**Plans:** 0 plans
+
+Plans:
+
+- [ ] TBD (run /gsd-plan-phase 16 to break down)
