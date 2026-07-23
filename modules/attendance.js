@@ -224,7 +224,7 @@ function bindMemberAttendance(root, context) {
 function row(record, members, trainers) {
   return `
     <div class="table-row">
-      <span>${nameCell(findName(members, record.memberId))}</span>
+      <span>${nameCell(findName(members, record.memberId), "", members.find(m => m.id === record.memberId)?.avatarUrl || "")}</span>
       <span>${dateLabel(record.date)}</span>
       <span>${escapeHtml(record.time || "-")}</span>
       <span>${escapeHtml(findName(trainers, record.trainerId, "Unassigned"))}</span>
@@ -259,7 +259,7 @@ function inactiveList(members, records, days) {
           const gap = last ? -daysUntil(last) : null;
           return `
             <div class="table-row" style="grid-template-columns:1.5fr 1fr 1fr">
-              <span>${nameCell(member.fullName, member.mobile || "")}</span>
+              <span>${nameCell(member.fullName, member.mobile || "", member.avatarUrl || "")}</span>
               <span>${last ? dateLabel(last) : "Never"}</span>
               <span><mark class="status ${gap !== null && gap >= 30 ? "expired" : "expiring-soon"}">${gap !== null ? `${gap} days` : "No visits"}</mark></span>
             </div>

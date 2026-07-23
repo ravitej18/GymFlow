@@ -104,7 +104,7 @@ function row(payment, members, plans, currency) {
         <strong>${escapeHtml(payment.receiptNumber || payment.id)}</strong>
         <small>${dateLabel(payment.date)} via ${escapeHtml(payment.method)}</small>
       </span>
-      <span>${nameCell(findName(members, payment.memberId))}</span>
+      <span>${nameCell(findName(members, payment.memberId), "", members.find(m => m.id === payment.memberId)?.avatarUrl || "")}</span>
       <span>${money(payment.amount, currency)}</span>
       <span><mark class="status ${statusClass(payment.status)}">${escapeHtml(payment.status)}</mark></span>
       <span class="row-actions"><button class="icon-button" data-receipt="${escapeHtml(payment.id)}" title="Print receipt"><span class="material-symbols-outlined">receipt_long</span>Receipt</button></span>

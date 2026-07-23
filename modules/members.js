@@ -673,7 +673,7 @@ function row(member, plans, trainers) {
       data-status="${escapeHtml(status)}"
       data-plan="${escapeHtml(member.planId || "")}"
       data-trainer="${escapeHtml(member.assignedTrainer || "")}">
-      ${nameCell(member.fullName, member.mobile || member.email || "")}
+      ${nameCell(member.fullName, member.mobile || member.email || "", member.avatarUrl || "")}
       <span>${escapeHtml(findName(plans, member.planId))}</span>
       <span>${dateLabel(member.endDate)}</span>
       <span><mark class="status ${statusClass(status)}">${escapeHtml(status)}</mark></span>
