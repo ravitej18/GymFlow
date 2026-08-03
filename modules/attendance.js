@@ -1,4 +1,4 @@
-import { collections, dateLabel, daysUntil, emptyState, escapeHtml, findName, formData, memberStatus, nameCell, optionList, pageHeader, today, withButtonLoading, awardPointsAndBadges } from "./utils.js";
+import { collections, calculateStreak, dateLabel, daysUntil, emptyState, escapeHtml, findName, formData, memberStatus, nameCell, optionList, pageHeader, today, withButtonLoading, awardPointsAndBadges } from "./utils.js";
 
 export const attendanceModule = {
   render(context) {
@@ -104,6 +104,26 @@ export const attendanceModule = {
         </div>
         <div data-inactive-list>${inactiveList(members, records, 7)}</div>
       </section>
+
+      <section class="panel" style="margin-top:18px; border: 1.5px dashed var(--line);">
+        <div class="panel-heading">
+          <h2 style="display:flex; align-items:center; gap:8px;">
+            <span class="material-symbols-outlined" style="font-size:1.1rem; color:var(--warning);">sync</span>
+            Streak Maintenance
+          </h2>
+        </div>
+        <p class="panel-hint" style="margin: 0 16px 12px;">
+          Recalculates <strong>currentStreak</strong> for every member from their actual check-in history.
+          Run this if streaks look wrong on the leaderboard or member cards.
+        </p>
+        <div style="padding: 0 16px 16px;">
+          <button class="ghost-button" id="recalc-streaks-btn" type="button" style="display:inline-flex; align-items:center; gap:6px;">
+            <span class="material-symbols-outlined" style="font-size:1rem;">local_fire_department</span>
+            Recalculate All Streaks
+          </button>
+          <span id="recalc-streaks-status" style="margin-left:12px; font-size:0.85rem; color:var(--text-muted);"></span>
+        </div>
+      </section>
     `;
   },
   bind(root, context) {
@@ -174,13 +194,35 @@ export const attendanceModule = {
         return;
       }
       await withButtonLoading(form.querySelector("[type='submit']"), async () => {
+        const checkedInMemberId = memberIdField.value;
         const saved = await context.services.data.save(collections.attendance, formData(form));
+        context.applyChange(collections.attendance, saved);
+
+        // ── Recalculate streak for the checked-in member ────────────────────
+        // Admin check-ins don't go through awardPointsAndBadges (which only
+        // operates on the logged-in user), so we must update the member's
+        // currentStreak manually here to keep the leaderboard correct.
+        const member = (context.data.members || []).find(m => m.id === checkedInMemberId);
+        if (member) {
+          // Include the just-saved record in the calculation
+          const memberAttendance = [
+            ...(context.data.attendance || []).filter(r => r.memberId === checkedInMemberId),
+            saved
+          ];
+          const newStreak = calculateStreak(memberAttendance);
+          if (newStreak !== (member.currentStreak || 0)) {
+            const updatedMember = { ...member, currentStreak: newStreak };
+            const savedMember = await context.services.data.save(collections.members, updatedMember);
+            context.applyChange(collections.members, savedMember);
+          }
+        }
+
         context.toast("Attendance recorded.");
         form.reset();
         form.date.value = today();
         form.time.value = new Date().toTimeString().slice(0, 5);
+        memberSearch.value = "";
         memberSearch.setCustomValidity("");
-        context.applyChange(collections.attendance, saved);
       });
     });
 
@@ -191,6 +233,40 @@ export const attendanceModule = {
       if (!button) return;
       tabs.querySelectorAll("[data-days]").forEach((b) => b.classList.toggle("active", b === button));
       listBox.innerHTML = inactiveList(context.data.members || [], context.data.attendance || [], Number(button.dataset.days));
+    });
+
+    // ── Recalculate All Streaks ──────────────────────────────────────────────
+    const recalcBtn    = root.querySelector("#recalc-streaks-btn");
+    const recalcStatus = root.querySelector("#recalc-streaks-status");
+    recalcBtn?.addEventListener("click", async () => {
+      recalcBtn.disabled = true;
+      recalcBtn.textContent = "Recalculating...";
+      if (recalcStatus) recalcStatus.textContent = "";
+
+      const allMembers    = context.data.members    || [];
+      const allAttendance = context.data.attendance || [];
+
+      let updated = 0;
+      for (const member of allMembers) {
+        const memberAttendance = allAttendance.filter(r => r.memberId === member.id);
+        const newStreak = calculateStreak(memberAttendance);
+        if (newStreak !== (member.currentStreak || 0)) {
+          const updatedMember = { ...member, currentStreak: newStreak };
+          const saved = await context.services.data.save(collections.members, updatedMember);
+          context.applyChange(collections.members, saved);
+          updated++;
+        }
+      }
+
+      recalcBtn.disabled = false;
+      recalcBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem;">local_fire_department</span> Recalculate All Streaks';
+      if (recalcStatus) {
+        recalcStatus.textContent = updated > 0
+          ? `✅ Done — updated ${updated} member${updated !== 1 ? "s" : ""}.`
+          : `✅ All streaks were already correct.`;
+        recalcStatus.style.color = "var(--success)";
+      }
+      context.toast(updated > 0 ? `Streaks recalculated for ${updated} member(s).` : "All streaks already up to date.");
     });
   }
 };

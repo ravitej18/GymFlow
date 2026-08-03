@@ -1,4 +1,4 @@
-import { escapeHtml, pageHeader, getAvatarUrl, renderSharedMemberFields, bindSharedBmiEvents, cmToFeetInches, calcBmi } from "./utils.js";
+import { escapeHtml, pageHeader, getAvatarUrl, renderSharedMemberFields, bindSharedBmiEvents, cmToFeetInches, calcBmi, today } from "./utils.js";
 
 const EMOJIS = [
   "😀", "😎", "🤓", "🤠", "👽", "🤖", "👑", "🧔", "🧑", "👩", "👨", "👱‍♀️", 
@@ -364,7 +364,7 @@ export const profileModule = {
           context.applyChange("members", savedMember);
 
           // Record measurements as per date for analytics
-          const todayStr = new Date().toISOString().slice(0, 10);
+          const todayStr = today();
           const progressRecords = context.data.progress_records || [];
           const existingTodayRecord = progressRecords.find(r => r.memberId === context.myMember.id && r.date === todayStr);
 

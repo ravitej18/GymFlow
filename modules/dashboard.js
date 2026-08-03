@@ -1,4 +1,4 @@
-import { dateLabel, daysUntil, escapeHtml, memberStatus, money, pageHeader, statusClass } from "./utils.js";
+import { dateLabel, daysUntil, escapeHtml, memberStatus, money, pageHeader, statusClass, today as todayDate } from "./utils.js";
 
 export const dashboardModule = {
   activeLeaderboardTab: "points",
@@ -16,7 +16,7 @@ export const dashboardModule = {
     const payments = data.payments || [];
     const attendance = data.attendance || [];
     const currency = settings?.currency || "INR";
-    const today = new Date().toISOString().slice(0, 10);
+    const today = todayDate();
     const month = today.slice(0, 7);
 
     const active = members.filter((member) => memberStatus(member) === "Active").length;
@@ -170,7 +170,7 @@ function renderMemberDashboard(context) {
     `;
   }
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayDate();
   const attendance = context.data.attendance || [];
   const myAttendance = attendance.filter((record) => record.memberId === me.id);
   const checkedInToday = myAttendance.some((record) => record.date === today);
@@ -247,7 +247,7 @@ function renderTrainerDashboard(context) {
     `;
   }
 
-  const todayKey = new Date().toISOString().slice(0, 10);
+  const todayKey = todayDate();
   const all = context.data.trainer_attendance || [];
   const mine = all.filter((record) => record.trainerId === me.id);
   const trainersInToday = all.filter((record) => record.date === todayKey).length;

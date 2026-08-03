@@ -40,7 +40,11 @@ export function dateLabel(value) {
 }
 
 export function today() {
-  return new Date().toISOString().slice(0, 10);
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm   = String(d.getMonth() + 1).padStart(2, "0");
+  const dd   = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
 }
 
 export function addDays(value, days) {
@@ -975,7 +979,10 @@ export function calculateStreak(attendanceRecords, restDay = "Sunday") {
   const dates = [...new Set(attendanceRecords.map(r => r.date))].sort((a, b) => b.localeCompare(a));
   
   const todayStr = today();
-  const yesterdayStr = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  // Compute yesterday using local date arithmetic (avoids UTC-vs-local timezone bugs)
+  const yDate = new Date();
+  yDate.setDate(yDate.getDate() - 1);
+  const yesterdayStr = `${yDate.getFullYear()}-${String(yDate.getMonth() + 1).padStart(2, "0")}-${String(yDate.getDate()).padStart(2, "0")}`;
   
   // If the last check-in is older than yesterday, the streak is broken
   if (dates[0] !== todayStr && dates[0] !== yesterdayStr) return 0;

@@ -63,6 +63,89 @@ function renderMemberForm(member, plans, trainers) {
         <input type="checkbox" name="privateLeaderboard" value="true" ${member?.privateLeaderboard ? "checked" : ""} />
         Hide me from leaderboards (Private Profile)
       </label>
+      ${!isEdit ? `
+      <div class="admission-payment-section" style="margin-top: 24px; border-top: 1.5px solid var(--line); padding-top: 20px;">
+        <h3 style="margin: 0 0 16px 0; font-size: 1.05rem; font-weight: 800; color: var(--text); font-family:'Montserrat',sans-serif; display:flex; align-items:center; gap:8px; text-transform: uppercase; letter-spacing: 0.5px;">
+          <span class="material-symbols-outlined" style="font-size:1.35rem; color:var(--accent);">payments</span>
+          Admission Payment
+        </h3>
+        
+        <div style="display: flex; flex-direction: column; gap: 20px; margin-bottom: 20px;">
+          
+          <!-- Payment Method Visual Selector -->
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <span style="font-size:0.82rem; font-weight:700; color:var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Payment Mode</span>
+            
+            <div class="payment-mode-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; width: 100%;">
+              
+              <div class="pay-card active" data-value="" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding: 14px 10px; border-radius: var(--r-md); border: 2px solid var(--accent); background: var(--primary-subtle); cursor:pointer; transition: all var(--dur-fast) var(--ease-out); text-align:center; color: var(--accent);">
+                <span class="material-symbols-outlined" style="font-size: 1.6rem;">money_off</span>
+                <span style="font-size: 0.8rem; font-weight: 700;">No Payment</span>
+              </div>
+              
+              <div class="pay-card" data-value="UPI" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding: 14px 10px; border-radius: var(--r-md); border: 2px solid var(--line); background: var(--surface); cursor:pointer; transition: all var(--dur-fast) var(--ease-out); text-align:center; color: var(--text-muted);">
+                <span class="material-symbols-outlined" style="font-size: 1.6rem;">qr_code_2</span>
+                <span style="font-size: 0.8rem; font-weight: 700;">UPI</span>
+              </div>
+              
+              <div class="pay-card" data-value="Card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding: 14px 10px; border-radius: var(--r-md); border: 2px solid var(--line); background: var(--surface); cursor:pointer; transition: all var(--dur-fast) var(--ease-out); text-align:center; color: var(--text-muted);">
+                <span class="material-symbols-outlined" style="font-size: 1.6rem;">credit_card</span>
+                <span style="font-size: 0.8rem; font-weight: 700;">Card</span>
+              </div>
+              
+              <div class="pay-card" data-value="Cash" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding: 14px 10px; border-radius: var(--r-md); border: 2px solid var(--line); background: var(--surface); cursor:pointer; transition: all var(--dur-fast) var(--ease-out); text-align:center; color: var(--text-muted);">
+                <span class="material-symbols-outlined" style="font-size: 1.6rem;">payments</span>
+                <span style="font-size: 0.8rem; font-weight: 700;">Cash</span>
+              </div>
+              
+              <div class="pay-card" data-value="Online" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding: 14px 10px; border-radius: var(--r-md); border: 2px solid var(--line); background: var(--surface); cursor:pointer; transition: all var(--dur-fast) var(--ease-out); text-align:center; color: var(--text-muted);">
+                <span class="material-symbols-outlined" style="font-size: 1.6rem;">account_balance</span>
+                <span style="font-size: 0.8rem; font-weight: 700;">Online</span>
+              </div>
+              
+              <div class="pay-card" data-value="Cheque" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding: 14px 10px; border-radius: var(--r-md); border: 2px solid var(--line); background: var(--surface); cursor:pointer; transition: all var(--dur-fast) var(--ease-out); text-align:center; color: var(--text-muted);">
+                <span class="material-symbols-outlined" style="font-size: 1.6rem;">ballot</span>
+                <span style="font-size: 0.8rem; font-weight: 700;">Cheque</span>
+              </div>
+              
+            </div>
+            <input type="hidden" name="paymentMethod" id="payment-method-hidden" value="" />
+          </div>
+          
+          <!-- Discount Controller -->
+          <div style="display:flex; flex-direction:column; gap:8px; max-width: 320px;">
+            <span style="font-size:0.82rem; font-weight:700; color:var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Discount Given</span>
+            <div style="display:flex; gap:0px; border:1px solid var(--line); border-radius: var(--r-sm); overflow:hidden; background: var(--surface); height: 42px;">
+              
+              <!-- Mode Toggle Button Group -->
+              <div style="display:flex; background: var(--line-soft); padding: 3px; border-radius: var(--r-sm) 0 0 var(--r-sm); border-right: 1px solid var(--line); gap: 2px; align-items: center;">
+                <button type="button" id="disc-pct-btn" data-disc-mode="pct" style="border: none; border-radius: calc(var(--r-sm) - 4px); width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; cursor: pointer; transition: all var(--dur-fast) var(--ease-out); background: var(--accent); color: #fff;">%</button>
+                <button type="button" id="disc-flat-btn" data-disc-mode="flat" style="border: none; border-radius: calc(var(--r-sm) - 4px); width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; cursor: pointer; transition: all var(--dur-fast) var(--ease-out); background: transparent; color: var(--text-muted);">₹</button>
+              </div>
+              
+              <!-- Input field with dynamic inner icons/labels -->
+              <div style="position: relative; flex: 1; display: flex; align-items: center;">
+                <span id="discount-symbol-prefix" style="position: absolute; left: 12px; font-weight: 700; color: var(--text-muted); pointer-events: none; display: none; font-size: 0.95rem;">₹</span>
+                <input type="number" name="discountValue" id="discount-value-input" min="0" step="0.01" value="0" placeholder="0" style="width: 100%; border: none; background: transparent; height: 100%; padding: 0 16px 0 28px; font-weight: 700; color: var(--text); font-size: 1rem; outline: none;" />
+                <span id="discount-symbol-suffix" style="position: absolute; right: 12px; font-weight: 700; color: var(--text-muted); pointer-events: none; font-size: 0.95rem;">%</span>
+              </div>
+              
+              <input type="hidden" name="discountMode" id="discount-mode-hidden" value="pct" />
+            </div>
+          </div>
+          
+        </div>
+
+        <!-- Styled Invoice Card -->
+        <div id="admission-invoice-card" style="background: var(--surface-soft); border: 1.5px solid var(--line); border-radius: var(--r-md); padding: 18px; transition: all var(--dur-base) var(--ease-out);">
+          <div style="display:flex; align-items:center; gap:8px; color: var(--text-muted);">
+            <span class="material-symbols-outlined" style="font-size: 1.25rem;">info</span>
+            <span style="font-size:0.88rem; font-weight:500;">Select a membership plan and payment mode above to view summary.</span>
+          </div>
+        </div>
+        
+      </div>
+      ` : ""}
       <div class="button-row" style="margin-top: 15px;">
         <button class="primary-button" type="submit">Save Member</button>
         <button class="ghost-button" type="button" id="cancel-form-btn-2">Cancel</button>
@@ -346,6 +429,145 @@ export const membersModule = {
       root.querySelector("#cancel-form-btn")?.addEventListener("click", handleCancel);
       root.querySelector("#cancel-form-btn-2")?.addEventListener("click", handleCancel);
 
+      // ── Premium Payment Card Selector & Discount Toggle ──────────────────
+      const payCards = form.querySelectorAll(".pay-card");
+      const payMethodHidden = form.querySelector("#payment-method-hidden");
+      const discPctBtn = form.querySelector("#disc-pct-btn");
+      const discFlatBtn = form.querySelector("#disc-flat-btn");
+      const discModeHidden = form.querySelector("#discount-mode-hidden");
+      const discValueInput = form.querySelector("#discount-value-input");
+      const symbolPrefix = form.querySelector("#discount-symbol-prefix");
+      const symbolSuffix = form.querySelector("#discount-symbol-suffix");
+      const invoiceCard = form.querySelector("#admission-invoice-card");
+
+      function _updateAdmissionPreview() {
+        if (!invoiceCard) return;
+        const planId = form.planId?.value;
+        const method = payMethodHidden?.value || "";
+        const plan = context.data.membership_plans.find(p => p.id === planId);
+        
+        const currency = context.settings?.currency || "₹";
+        const symbol = currency === "INR" ? "₹" : currency;
+
+        if (!method) {
+          invoiceCard.innerHTML = `
+            <div style="display:flex; align-items:center; gap:10px; color: var(--text-muted);">
+              <span class="material-symbols-outlined" style="font-size: 1.35rem; color: var(--muted);">info</span>
+              <span style="font-size:0.88rem; font-weight:500;">No admission payment transaction will be created for this member.</span>
+            </div>
+          `;
+          return;
+        }
+        if (!plan) {
+          invoiceCard.innerHTML = `
+            <div style="display:flex; align-items:center; gap:10px; color: var(--text-muted);">
+              <span class="material-symbols-outlined" style="font-size: 1.35rem; color: var(--warning);">warning</span>
+              <span style="font-size:0.88rem; font-weight:500;">Please select a membership plan to calculate the payment details.</span>
+            </div>
+          `;
+          return;
+        }
+
+        const baseAmount = Number(plan.price || 0);
+        const discMode = discModeHidden?.value || "pct";
+        const discVal = Number(discValueInput?.value || 0);
+        let discAmt = 0;
+        if (discMode === "pct") {
+          discAmt = Math.min(baseAmount, (baseAmount * discVal) / 100);
+        } else {
+          discAmt = Math.min(baseAmount, discVal);
+        }
+        const finalAmount = Math.max(0, baseAmount - discAmt);
+
+        invoiceCard.innerHTML = `
+          <div style="display: flex; flex-direction: column; gap: 12px; font-family: Inter, sans-serif;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px dashed var(--line); padding-bottom: 10px;">
+              <span style="font-size: 0.85rem; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 0.8px;">Admission Payment Details</span>
+              <span style="font-size: 0.78rem; font-weight: 800; background: var(--primary-fade); color: var(--accent); padding: 4px 10px; border-radius: var(--r-xs); border: 1px solid rgba(0, 194, 255, 0.15);">${method}</span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--text-muted);">
+              <span>Base Price (${plan.planName})</span>
+              <span style="font-weight: 600;">${symbol}${baseAmount.toLocaleString("en-IN")}</span>
+            </div>
+            
+            ${discAmt > 0 ? `
+            <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--success); font-weight: 600;">
+              <span>Discount Applied (${discMode === "pct" ? discVal + "%" : "Flat"})</span>
+              <span>−${symbol}${discAmt.toLocaleString("en-IN")}</span>
+            </div>
+            ` : ""}
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1.5px solid var(--line); padding-top: 12px; margin-top: 4px;">
+              <span style="font-size: 0.92rem; font-weight: 800; color: var(--text);">Grand Total</span>
+              <span style="font-size: 1.25rem; font-weight: 900; color: var(--text); font-family: 'Montserrat', sans-serif;">${symbol}${finalAmount.toLocaleString("en-IN")}</span>
+            </div>
+          </div>
+        `;
+      }
+
+      // Handle pay cards toggling
+      payCards.forEach(card => {
+        card.addEventListener("click", () => {
+          payCards.forEach(c => {
+            c.classList.remove("active");
+            c.style.borderColor = "var(--line)";
+            c.style.background = "var(--surface)";
+            c.style.color = "var(--text-muted)";
+          });
+          card.classList.add("active");
+          card.style.borderColor = "var(--accent)";
+          card.style.background = "var(--primary-subtle)";
+          card.style.color = "var(--accent)";
+          if (payMethodHidden) {
+            payMethodHidden.value = card.dataset.value;
+          }
+          _updateAdmissionPreview();
+        });
+      });
+
+      // Handle discount type changes
+      if (discPctBtn && discFlatBtn && discModeHidden) {
+        discPctBtn.addEventListener("click", () => {
+          discModeHidden.value = "pct";
+          discPctBtn.style.background  = "var(--accent)";
+          discPctBtn.style.color       = "#fff";
+          discFlatBtn.style.background = "transparent";
+          discFlatBtn.style.color      = "var(--text-muted)";
+          
+          if (symbolPrefix) symbolPrefix.style.display = "none";
+          if (symbolSuffix) symbolSuffix.style.display = "block";
+          if (discValueInput) {
+            discValueInput.style.paddingLeft = "16px";
+            discValueInput.style.paddingRight = "28px";
+          }
+          
+          _updateAdmissionPreview();
+        });
+        
+        discFlatBtn.addEventListener("click", () => {
+          discModeHidden.value = "flat";
+          discFlatBtn.style.background = "var(--accent)";
+          discFlatBtn.style.color      = "#fff";
+          discPctBtn.style.background  = "transparent";
+          discPctBtn.style.color       = "var(--text-muted)";
+          
+          if (symbolPrefix) symbolPrefix.style.display = "block";
+          if (symbolSuffix) symbolSuffix.style.display = "none";
+          if (discValueInput) {
+            discValueInput.style.paddingLeft = "28px";
+            discValueInput.style.paddingRight = "16px";
+          }
+          
+          _updateAdmissionPreview();
+        });
+        
+        discValueInput?.addEventListener("input", _updateAdmissionPreview);
+      }
+      
+      // Also update preview when plan changes
+      form.planId?.addEventListener("change", _updateAdmissionPreview);
+
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
         const payload = formData(form);
@@ -379,6 +601,15 @@ export const membersModule = {
         };
         const hasMeasurements = Object.values(measurements).some((v) => v !== "");
         payload.status = payload.status === "Suspended" ? "Suspended" : memberStatus(payload);
+
+        // Capture payment intent before stripping form-only fields
+        const selectedPaymentMethod = payload.paymentMethod || "";
+        const discountMode  = payload.discountMode  || "pct";
+        const discountValue = Number(payload.discountValue || 0);
+        // Remove form-UI-only fields from the member payload
+        delete payload.paymentMethod;
+        delete payload.discountMode;
+        delete payload.discountValue;
         
         await withButtonLoading(form.querySelector("[type='submit']"), async () => {
           const saved = await context.services.data.save(collections.members, payload);
@@ -400,19 +631,29 @@ export const membersModule = {
             context.applyChange(collections.progress, savedProgress);
           }
 
-          if (isNew && saved.planId) {
+          if (isNew && saved.planId && selectedPaymentMethod) {
             const plan = context.data.membership_plans.find((p) => p.id === saved.planId);
-            const amount = plan ? Number(plan.price || 0) : 0;
+            const baseAmount = plan ? Number(plan.price || 0) : 0;
+            let discAmt = 0;
+            if (discountMode === "pct") {
+              discAmt = Math.min(baseAmount, (baseAmount * discountValue) / 100);
+            } else {
+              discAmt = Math.min(baseAmount, discountValue);
+            }
+            const finalAmount = Math.max(0, baseAmount - discAmt);
             const paymentRecord = {
               memberId: saved.id,
               planId: saved.planId,
-              amount,
+              amount: finalAmount,
               date: saved.startDate || today(),
-              method: "Cash",
+              method: selectedPaymentMethod,
               collectedBy: context.profile?.name || "Owner",
               status: "Paid",
               receiptNumber: `RCPT-${Date.now().toString().slice(-8)}`,
-              notes: `Auto-recorded admission payment for ${plan ? plan.planName : "plan"}`
+              notes: [
+                `Admission payment for ${plan ? plan.planName : "plan"}`,
+                discAmt > 0 ? `Discount applied: ${discountMode === "pct" ? discountValue + "%" : "₹" + discountValue} (₹${discAmt.toFixed(2)} off)` : ""
+              ].filter(Boolean).join(" · ")
             };
             const savedPayment = await context.services.data.save(collections.payments, paymentRecord);
             context.applyChange(collections.payments, savedPayment);
