@@ -1737,6 +1737,7 @@ code { padding: 2px 6px; border-radius: 5px; background: var(--surface-strong); 
   .profile-chip strong, .profile-chip span { display: none; }
   .profile-chip { justify-content: center; padding: 8px; }
   .sidebar-footer { width: 100%; }
+  .sidebar-attribution { display: none; }
 
   .topbar { padding: 0 20px; }
   .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -2689,7 +2690,78 @@ body, button, input, select, textarea, .profile-chip strong {
   }
 }
 
+/* ===== Made With Love Attribution Styling ===== */
+.auth-footer,
+.settings-footer .attribution-text {
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.5;
+}
 
+.auth-footer {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line-soft);
+}
 
+.sidebar-attribution {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.1);
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+  line-height: 1.4;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
 
+/* Sidebar is ALWAYS dark background (#121212) — use bright electric cyan links */
+.sidebar-attribution a {
+  color: rgba(56, 189, 248, 0.85) !important;
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(56, 189, 248, 0.3);
+  transition: color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
 
+.sidebar-attribution a:hover {
+  color: #ccff00 !important;
+  border-bottom-color: rgba(204, 255, 0, 0.6);
+}
+
+/* Page footers (auth, settings) */
+.auth-footer a,
+.settings-footer .attribution-text a {
+  color: var(--teal-text, #00c2ff);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.auth-footer a:hover,
+.settings-footer .attribution-text a:hover {
+  color: var(--green-ink, #4d6600);
+}
+
+[data-theme="dark"] .auth-footer a:hover,
+[data-theme="dark"] .settings-footer .attribution-text a:hover {
+  color: var(--primary, #ccff00);
+}
+
+.heart {
+  display: inline-block;
+  color: #ff4757;
+  margin: 0 2px;
+  filter: drop-shadow(0 0 4px rgba(255, 71, 87, 0.4));
+  transition: transform var(--dur-fast) var(--ease-spring);
+}
+
+.auth-footer:hover .heart,
+.sidebar-attribution:hover .heart,
+.settings-footer:hover .heart,
+.heart:hover {
+  transform: scale(1.3);
+}

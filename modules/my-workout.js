@@ -1012,7 +1012,7 @@ export const myWorkoutModule = {
         context.applyChange(collections.workoutLogs, saved);
         await awardPointsAndBadges(context, "workout", { workout: payload });
         this.activeTab = "history";
-        await context.refreshView();
+        // Local state update via applyChange is already handled; re-render view without data re-fetch
       }, "Saving...");
     });
 

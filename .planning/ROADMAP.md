@@ -421,14 +421,16 @@ Plans:
 | 14 | Analytics & Insights | 1/1 | Complete | 2026-07-31 |
 | 15 | Multi-Branch Support | 0/1 | Not started | — |
 | 16 | Owner UX Enhancements | 1/1 | Complete    | 2026-07-31 |
+| 17 | Database Performance Optimization & Scoped Loading | 2/2 | Complete    | 2026-08-10 |
 
 ### Phase 17: Database Performance Optimization & Scoped Loading
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Eliminate monolithic database fetching and optimize app loading speed with tab-scoped Firestore collection loading, role-filtered member queries, optimistic local state updates, and silent IndexedDB persistence.
 **Depends on:** Phase 16
-**Plans:** 0 plans
+**Status:** Complete
 
 Plans:
 
-- [ ] TBD (run /gsd-plan-phase 17 to break down)
+- [x] 17-01: Tab-scoped & role-filtered data loading engine (`app.js` & `lib/firebase-init.js`)
+- [x] 17-02: Optimistic local state updates (`my-workout.js`, `payments.js`, `renewals.js`)
+

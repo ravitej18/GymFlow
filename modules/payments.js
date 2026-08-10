@@ -433,7 +433,7 @@ export const paymentsModule = {
           this.activeView = "list";
           this.prefilledMemberId = null;
           form.reset();
-          context.refreshView();
+          context.applyChange(collections.payments, saved);
         });
       });
 

@@ -58,6 +58,13 @@ export const settingsModule = {
             <label class="file-button">Import JSON<input type="file" accept="application/json" data-action="import" /></label>
           </div>
         </section>
+        <section class="panel stack settings-footer">
+          <div class="panel-heading"><h2>About GymFlow</h2></div>
+          <p class="panel-hint">Open-source Gym Management &amp; Tracking Platform.</p>
+          <div class="attribution-text">
+            Made with <span class="heart">❤️</span> by <a href="https://github.com/SriSatyaLokesh" target="_blank" rel="noopener noreferrer">SriSatyaLokesh</a> &amp; <a href="https://github.com/ravitej18" target="_blank" rel="noopener noreferrer">Raviteja</a>
+          </div>
+        </section>
       </div>
     `;
   },

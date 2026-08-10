@@ -116,6 +116,9 @@ export function renderAuth(root, context) {
         </div>
 
         <p class="auth-note">${escapeHtml(context.mode === "firebase" ? "Your gym data is saved and synced automatically." : "Running in demo mode on this device.")}</p>
+        <footer class="auth-footer">
+          Made with <span class="heart">❤️</span> by <a href="https://github.com/SriSatyaLokesh" target="_blank" rel="noopener noreferrer">SriSatyaLokesh</a> &amp; <a href="https://github.com/ravitej18" target="_blank" rel="noopener noreferrer">Raviteja</a>
+        </footer>
       </section>
     </main>
     <div class="toast" data-auth-toast></div>

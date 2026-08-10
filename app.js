@@ -123,7 +123,7 @@ async function boot() {
   registerServiceWorker();
   getExercises().catch(() => {});
 
-  window.addEventListener("hashchange", () => {
+  window.addEventListener("hashchange", async () => {
     state.route = getRoute();
     if (membersModule.activeMemberId) membersModule.activeMemberId = null;
     if (membersModule.activeView) membersModule.activeView = "list";
@@ -135,6 +135,7 @@ async function boot() {
     if (renewalsModule.activeView) renewalsModule.activeView = "list";
     if (renewalsModule.prefilledMemberId) renewalsModule.prefilledMemberId = null;
     reportsModule.activeTab = "analytics";
+    await reloadData(state.route);
     render();
   });
 
@@ -214,17 +215,61 @@ async function boot() {
   render();
 }
 
-// Fetch settings + all collections into state. Sets state.error on failure.
-// Does NOT render — callers decide whether to do a full render() or renderView().
-async function reloadData() {
-  try {
-    const [settings, ...collections] = await Promise.all([
-      state.services.data.getSettings(),
-      ...collectionNames.map((name) => state.services.data.list(name))
-    ]);
+// Global collections loaded on boot/login
+const GLOBAL_COLLECTIONS = ["members", "trainers", "membership_plans"];
 
-    state.settings = settings;
-    state.data = Object.fromEntries(collectionNames.map((name, index) => [name, collections[index]]));
+// Route to collection mapping
+const ROUTE_SCOPES = {
+  dashboard: ["payments", "attendance"],
+  payments: ["payments"],
+  "my-payments": ["payments"],
+  workouts: ["workout_templates", "workout_assignments", "workout_sessions", "workout_logs", "exercise_library"],
+  "my-workout": ["workout_templates", "workout_assignments", "workout_sessions", "workout_logs", "exercise_library"],
+  progress: ["progress_records"],
+  attendance: ["attendance", "trainer_attendance"],
+  "trainer-checkin": ["attendance", "trainer_attendance"],
+  "my-checkins": ["attendance", "trainer_attendance"],
+  renewals: ["membership_pauses", "payments"],
+  reminders: ["reminders"],
+  leaderboard: ["attendance", "progress_records", "badges"],
+  reports: ["payments", "attendance", "progress_records"],
+  trainers: ["workout_assignments", "workout_sessions"],
+  settings: [],
+  profile: [],
+  "my-membership": ["payments"]
+};
+
+// Fetch settings + scoped collections into state. Sets state.error on failure.
+async function reloadData(targetRoute = state.route) {
+  try {
+    const routeCollections = ROUTE_SCOPES[targetRoute] || [];
+    const needed = [...new Set([...GLOBAL_COLLECTIONS, ...routeCollections])];
+
+    // Filter out collections already loaded in state.data
+    const toFetch = needed.filter((name) => !state.data[name]);
+
+    const promises = [];
+    if (!state.settings) {
+      promises.push(state.services.data.getSettings());
+    }
+
+    toFetch.forEach((name) => {
+      promises.push(state.services.data.list(name));
+    });
+
+    if (promises.length === 0) return;
+
+    const results = await Promise.all(promises);
+
+    let resultIdx = 0;
+    if (!state.settings) {
+      state.settings = results[resultIdx++];
+    }
+
+    toFetch.forEach((name) => {
+      state.data[name] = results[resultIdx++];
+    });
+
     state.error = "";
   } catch (error) {
     console.error("Failed to load workspace data.", error);
@@ -589,7 +634,7 @@ async function refreshData() {
 // Scoped refresh: reload data but re-render only the current module's #view,
 // avoiding a full shell rebuild (no flicker / scroll jump). Used after form saves.
 async function refreshView() {
-  await reloadData();
+  await reloadData(state.route);
   if (state.error) {
     render(); // surface the error screen via the full renderer
     return;
@@ -813,6 +858,9 @@ Total members listed: ${(state.data.members || []).length}</pre>
             <strong>${state.profile.name}</strong>
             <span>${state.profile.role}</span>
           </div>
+        </div>
+        <div class="sidebar-attribution">
+          Made with <span class="heart">❤️</span> by <a href="https://github.com/SriSatyaLokesh" target="_blank" rel="noopener noreferrer">SriSatyaLokesh</a> &amp; <a href="https://github.com/ravitej18" target="_blank" rel="noopener noreferrer">Raviteja</a>
         </div>
       </div>
     </aside>
