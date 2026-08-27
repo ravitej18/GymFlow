@@ -43,6 +43,34 @@ GymFlow is a progressive web app (vanilla JS, ES modules) backed by Firebase Aut
 - **Workout template library** — create reusable named plans with goal, exercises, and notes
 - **Card grid view** — browse all templates at a glance
 
+### Workout Runner *(member)*
+- **Guided logging** — exercise-by-exercise flow with previous bests inline
+- **Live timers** — elapsed session clock and a rest timer with skip / auto-expire
+- **Progress strip** — completed sets, next-set highlight, per-workout progress bar
+- **Supersets** — link exercises performed back to back
+- **Modes** — rep-based, timed holds, or cardio (distance and duration)
+- **Screen wake lock** — the phone stays awake mid-set
+- **Who is training now** — see which members are in the gym right now
+
+### Automatic Progression
+- **Five schemes** — linear, Greyskull LP, double progression, bodyweight, timed
+- **Deloads** — cuts the load automatically after repeated stalls
+- **Always explained** — every suggested weight comes with a "why this target?" note
+- **Per-exercise override** — or let the app pick the scheme from your history
+
+### Training Analytics *(member)*
+- **Estimated 1RM** — Epley estimate, current and best ever, with a trend
+- **Per-exercise progress curves** — strength over time for any lift you train
+- **Effort profile** — RPE distribution and reps in reserve
+- **Muscle balance** — anatomical body map showing what you are neglecting
+- **Training heatmap** — which days and times you actually train
+
+### Import From Other Apps
+- **FitNotes, Strong, Hevy** — bring your workout history across
+- **Apple Health** — import body-weight records
+- **Preview before writing** — nothing is saved until you confirm
+- **Duplicate-safe** — re-importing the same file changes nothing
+
 ### Progress Tracking
 - **Progress records** — owner logs weight, BMI, body fat %, chest, waist per member per date
 - **Trend charts** — SVG line chart per member with metric selector (weight / BMI / body fat / waist)
@@ -194,7 +222,13 @@ modules/                # one module per screen
   settings.js           # gym profile + backup/restore
   my-membership.js      # member self-view: membership card
   my-payments.js        # member self-view: payment receipts
+  my-workout.js         # member: workout runner, history, import
   utils.js              # shared helpers (DOM, data, export)
+
+  # Pure engines — no DOM, no Firebase. See docs/TRAINING_FEATURES.md
+  workout-progression.js  # what weight to use next, and why
+  workout-analytics.js    # 1RM, progress curves, muscle balance, heatmap
+  workout-import.js       # FitNotes / Strong / Hevy / Apple Health parsers
 
 styles/
   main.css              # design tokens, themes, all component styles
@@ -204,6 +238,15 @@ scripts/
   seed-demo.js          # demo environment seeder
   seed-members.js       # bulk member seeder
   smoke-test.mjs        # renders every module; verifies no crash
+  test-*.mjs            # unit and render tests (see Testing below)
+
+native/                 # Capacitor Android shell (optional, self-contained)
+  README.md             # build instructions
+  capacitor.config.json # app id, name, splash
+  sync-web.mjs          # copies the web app into www/ for packaging
+
+docs/
+  TRAINING_FEATURES.md  # runner, progression, analytics, importers
 ```
 
 ### Firestore Collections
@@ -219,6 +262,11 @@ scripts/
 | `workout_templates` | Reusable workout plans |
 | `workout_assignments` | Trainer → member plan assignments |
 | `progress_records` | Member body measurement records |
+| `workout_logs` | Completed member workouts (sets, reps, weights) |
+| `workout_schedules` | Member weekly schedules and custom routines |
+| `workout_presence` | Ephemeral "training now" heartbeats |
+| `exercise_library` | Member-created custom exercises |
+| `badges` | Gamification badge definitions |
 | `reminders` | Reminder send log |
 | `settings` | Per-gym configuration |
 
@@ -226,9 +274,24 @@ scripts/
 
 ## Testing
 
+No test framework — every suite is a plain Node script with no dependencies.
+
 ```bash
-node scripts/smoke-test.mjs   # verifies every module renders valid HTML
+node scripts/smoke-test.mjs            # every module renders valid HTML
+node scripts/test-progression.mjs      # progression schemes and deloads
+node scripts/test-analytics.mjs        # 1RM, progress curves, muscle balance
+node scripts/test-import.mjs           # CSV parsing, dedupe, payload shape
+node scripts/test-import-formats.mjs   # real verified export headers
+node scripts/test-runner-render.mjs    # workout runner markup
+node scripts/test-analytics-render.mjs # analytics tab markup
+node scripts/test-import-render.mjs    # import tab markup and escaping
+node scripts/test-gamification.mjs     # points, badges, streaks
+node scripts/test-phone-auth.mjs       # phone-number login normalisation
 ```
+
+Run the lot before opening a PR. The `*-render.mjs` suites call `render()`
+headlessly and assert on the HTML — an engine can be correct while the template
+displaying it leaks `undefined` or fails to escape user content.
 
 ---
 

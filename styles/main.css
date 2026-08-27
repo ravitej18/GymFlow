@@ -1000,6 +1000,27 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* Heatmap cell level styling */
+.heatmap-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 6px;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.heatmap-table th {
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.heatmap-table th[scope="row"] {
+  text-align: left;
+  padding-right: 10px;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
 .heatmap-cell {
   background: var(--surface-soft);
   color: var(--muted);
@@ -1918,12 +1939,418 @@ code { padding: 2px 6px; border-radius: 5px; background: var(--surface-strong); 
   letter-spacing: 0.5px;
 }
 
+.active-workout-subline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.active-workout-subline span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 2px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xs);
+  background: var(--bg-alt);
+}
+
+.workout-runner-strip {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.workout-progress-shell {
+  height: 10px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg-alt);
+}
+
+.workout-progress-shell span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent, var(--primary));
+  transition: width var(--dur-fast) var(--ease-out);
+}
+
+.rest-timer-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 6px 8px 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.rest-timer-chip.running {
+  border-color: var(--accent, var(--primary));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, var(--primary)) 18%, transparent);
+}
+
+.rest-timer-chip .material-symbols-outlined {
+  color: var(--accent, var(--primary));
+  font-size: 20px;
+}
+
+.progression-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--accent, var(--primary)) 35%, var(--line));
+  border-radius: var(--r-sm);
+  background: color-mix(in srgb, var(--accent, var(--primary)) 9%, transparent);
+  color: var(--ink);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.progression-note .material-symbols-outlined {
+  color: var(--accent, var(--primary));
+  font-size: 19px;
+}
+
+
+/* ===== Progression picker, supersets, modes, live presence ===== */
+.progression-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0 2px;
+  font-size: 0.8rem;
+}
+
+.progression-picker label {
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-size: 0.7rem;
+}
+
+.progression-picker select {
+  flex: 1 1 150px;
+  min-width: 0;
+  padding: 4px 6px;
+  font-size: 0.8rem;
+}
+
+.superset-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent, var(--primary)) 18%, transparent);
+  color: var(--accent, var(--primary));
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+/* Superset peers read as one connected block */
+.exercise-card.in-superset {
+  border-left: 3px solid var(--accent, var(--primary));
+}
+
+.training-now {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+  padding: 8px 12px;
+  border: 1px solid color-mix(in srgb, var(--accent, var(--primary)) 32%, var(--line));
+  border-radius: var(--r-sm);
+  background: color-mix(in srgb, var(--accent, var(--primary)) 8%, transparent);
+  color: var(--ink);
+  font-size: 0.84rem;
+}
+
+.training-now .material-symbols-outlined {
+  flex: 0 0 auto;
+  font-size: 20px;
+  color: var(--accent, var(--primary));
+}
+
+@media (max-width: 520px) {
+  .progression-picker select {
+    flex-basis: 100%;
+  }
+  .progression-picker .superset-toggle-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ===== Workout history import (My Workout > Import tab) ===== */
+.import-warnings {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, #d97706 45%, var(--line));
+  border-radius: var(--r-sm);
+  background: color-mix(in srgb, #d97706 10%, transparent);
+}
+
+.import-warnings p {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--ink);
+}
+
+.import-warnings .material-symbols-outlined {
+  flex: 0 0 auto;
+  font-size: 18px;
+  color: #d97706;
+}
+
+.import-preview {
+  margin-top: 4px;
+}
+
+/* ===== Training Analytics (Progress > Training Analytics tab) ===== */
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.analytics-stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin: 14px 0 6px;
+}
+
+.analytics-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--bg-alt);
+}
+
+.analytics-stat-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.analytics-stat-value {
+  font-size: 1.2rem;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.analytics-trend-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  margin: 16px 0 8px;
+}
+
+.analytics-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.analytics-delta .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.analytics-delta.up {
+  color: #15803d;
+  background: rgba(22, 163, 74, 0.12);
+}
+
+.analytics-delta.down {
+  color: #b91c1c;
+  background: rgba(185, 28, 28, 0.12);
+}
+
+.analytics-delta.neutral {
+  color: var(--muted);
+  background: var(--bg-alt);
+  font-weight: 600;
+}
+
+[data-theme="dark"] .analytics-delta.up {
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.16);
+}
+
+[data-theme="dark"] .analytics-delta.down {
+  color: #fca5a5;
+  background: rgba(252, 165, 165, 0.16);
+}
+
+/* Shared horizontal bar rows — muscle balance and effort profile */
+.muscle-balance,
+.effort-list {
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.muscle-row {
+  display: grid;
+  grid-template-columns: 84px 1fr 74px;
+  gap: 10px;
+  align-items: center;
+}
+
+.muscle-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.muscle-bar {
+  display: block;
+  height: 10px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg-alt);
+}
+
+.muscle-bar > span {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  border-radius: inherit;
+  background: var(--accent, var(--primary));
+  transition: width var(--dur-fast) var(--ease-out);
+}
+
+.muscle-value {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: right;
+  color: var(--ink);
+}
+
+.muscle-value small {
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.analytics-footnote {
+  margin: 12px 0 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+@media (max-width: 520px) {
+  .muscle-row {
+    grid-template-columns: 70px 1fr 62px;
+    gap: 8px;
+  }
+  .analytics-stat-value {
+    font-size: 1.05rem;
+  }
+}
+
+/* Exercise media — thumbnails in the search list and on active exercise cards */
+.exercise-thumb {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: #fff;
+}
+
+.exercise-thumb-empty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-alt);
+  color: var(--muted);
+}
+
+.exercise-thumb-empty .material-symbols-outlined {
+  font-size: 22px;
+}
+
+.search-exercise-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  transition: background var(--dur-micro) var(--ease-out);
+}
+
+.search-exercise-row:hover,
+.search-exercise-row:focus-visible {
+  background: var(--bg-alt);
+}
+
+.search-exercise-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.search-exercise-meta {
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-transform: capitalize;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exercise-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .active-set-row {
   transition: background var(--dur-micro) var(--ease-out);
 }
 
 .active-set-row.set-done {
   background: rgba(22, 163, 74, 0.1) !important;
+}
+
+.active-set-row.set-next {
+  outline: 2px solid var(--accent, var(--primary));
+  outline-offset: 2px;
+  border-radius: var(--r-xs);
 }
 
 .active-set-row input, .active-set-row select {
@@ -2310,6 +2737,13 @@ body, button, input, select, textarea, .profile-chip strong {
 
 /* Active Workout Logger sets table rules on mobile */
 @media (max-width: 520px) {
+  .workout-runner-strip {
+    grid-template-columns: 1fr;
+  }
+  .rest-timer-chip {
+    justify-content: space-between;
+    width: 100%;
+  }
   .logger-table-head, .logger-set-row, .active-set-row {
     grid-template-columns: 32px 1fr 1fr 1fr 1fr 40px !important;
     gap: 4px !important;

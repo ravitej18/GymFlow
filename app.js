@@ -101,6 +101,7 @@ const collectionNames = [
   "exercise_library",
   "workout_logs",
   "workout_schedules",
+  "workout_presence",
   "badges"
 ];
 
@@ -317,8 +318,8 @@ const ROUTE_SCOPES = {
   dashboard: ["payments", "attendance"],
   payments: ["payments"],
   "my-payments": ["payments"],
-  workouts: ["workout_templates", "workout_assignments", "workout_sessions", "workout_logs", "exercise_library"],
-  "my-workout": ["workout_templates", "workout_assignments", "workout_sessions", "workout_logs", "exercise_library"],
+  workouts: ["workout_templates", "workout_assignments", "workout_sessions", "workout_logs", "exercise_library", "workout_presence"],
+  "my-workout": ["workout_templates", "workout_assignments", "workout_sessions", "workout_logs", "exercise_library", "workout_presence"],
   progress: ["progress_records"],
   attendance: ["attendance", "trainer_attendance"],
   "trainer-checkin": ["attendance", "trainer_attendance"],
@@ -1051,6 +1052,10 @@ Total members listed: ${(state.data.members || []).length}</pre>
 
 // Re-render only the current module's #view (and re-bind it), leaving the
 // sidebar/topbar untouched. No-op if the shell isn't mounted yet.
+// Tracks which module currently owns #view so we can call its destroy() hook
+// when navigating away — innerHTML swaps do not stop intervals or timers.
+let lastRenderedModule = null;
+
 function renderView() {
   const view = document.querySelector("#view");
   if (!view) {
@@ -1058,6 +1063,11 @@ function renderView() {
     return;
   }
   const currentModule = modules[state.route] || dashboardModule;
+  // Let the outgoing module release timers/listeners before its DOM is discarded.
+  if (lastRenderedModule && lastRenderedModule !== currentModule) {
+    lastRenderedModule.destroy?.();
+  }
+  lastRenderedModule = currentModule;
   view.innerHTML = currentModule.render(makeContext());
   currentModule.bind?.(view, makeContext());
 }

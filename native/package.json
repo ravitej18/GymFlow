@@ -1,0 +1,23 @@
+{
+  "name": "gymflow-native",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Capacitor Android shell for the GymFlow PWA. Kept out of the app root so the web app stays build-step free.",
+  "scripts": {
+    "sync": "node sync-web.mjs && npx cap sync android",
+    "add:android": "node sync-web.mjs && npx cap add android",
+    "open:android": "npx cap open android",
+    "build:debug": "node sync-web.mjs && npx cap sync android && cd android && gradlew.bat assembleDebug",
+    "build:release": "node sync-web.mjs && npx cap sync android && cd android && gradlew.bat assembleRelease"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.0"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/app": "^6.0.2",
+    "@capacitor/core": "^6.2.0",
+    "@capacitor/splash-screen": "^6.0.3",
+    "@capacitor/status-bar": "^6.0.2"
+  }
+}

@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 18 planned
-last_updated: "2026-08-11T04:58:45.973Z"
+stopped_at: Phase 19 (openGym feature catch-up) built, awaiting commit
+last_updated: "2026-08-27T00:00:00.000Z"
 progress:
-  total_phases: 12
-  completed_phases: 11
+  total_phases: 14
+  completed_phases: 13
   total_plans: 16
   completed_plans: 16
 ---
@@ -17,8 +17,8 @@ progress:
 ## Current Status
 
 - **Milestone:** v1.0
-- **Active Branch:** `feature/member-view-refactor`
-- **Last Phase Completed:** Phase 14 — Analytics & Insights
+- **Active Branch:** `featurecatchup`
+- **Last Phase Completed:** Phase 19 — Training Feature Catch-Up (uncommitted)
 - **Next Phase:** Phase 15 — Multi-Branch Support
 
 ## Completed Phases
@@ -42,18 +42,43 @@ progress:
 | 14 | Analytics & Insights | feature/member-view-refactor | 2026-07-31 |
 | 16 | Owner UX Enhancements | feature/member-view-refactor | 2026-07-31 |
 | 17 | Database Performance Optimization & Scoped Loading | main | 2026-08-10 |
+| 18 | Psychological Principles & UX Optimization | main (#30) | 2026-08-11 |
+| 19 | Training Feature Catch-Up | featurecatchup (uncommitted) | 2026-08-27 |
 
 ## Upcoming Phases (Priority Order)
 
 | Phase | Name | Priority |
 |---|---|---|
-| 18 | Psychological Principles & UX Optimization | HIGH |
 | 15 | Multi-Branch Support | MEDIUM |
 
 ## In-Progress Work
 
-- **Branch:** `feature/member-view-refactor`
-- **Status:** Ready to plan
+- **Branch:** `featurecatchup`
+- **Status:** Phase 19 code complete and tested; changes are uncommitted in the
+  working tree awaiting review. See `docs/TRAINING_FEATURES.md`.
+
+### Phase 19 — Training Feature Catch-Up (2026-08-27)
+
+Closed the training-experience gaps against a comparable open-source gym app.
+
+| Area | Delivered |
+|---|---|
+| Workout runner | Supersets, timed/cardio modes, screen wake lock, live "who is training now" presence, rest timer, next-set highlight |
+| Progression | New engine with 5 schemes (linear, Greyskull LP, double, bodyweight, timed) plus automatic deloads after stalls |
+| Analytics | Estimated 1RM, per-exercise curves, RPE/RIR effort profile, anatomical body map, training heatmap |
+| Importers | FitNotes, Strong, Hevy, Apple Health — verified against real export headers |
+| Native | Capacitor Android shell under `native/`, isolated from the build-step-free web app |
+
+**New modules:** `workout-progression.js`, `workout-analytics.js`, `workout-import.js`
+**New collection:** `workout_presence` (with Firestore rules)
+**Tests:** 10 suites, all passing
+
+**Not done, deliberately:**
+- Localized exercise instructions — the dataset has 4,414 unique English steps;
+  offline substitution produces mixed-language output. Needs on-demand
+  translation with a per-exercise cache.
+- Passkeys / WebAuthn — Firebase Auth has no native support; assertion
+  verification needs Cloud Functions and therefore the Blaze billing plan.
 
 ## Key Architectural Facts
 
@@ -73,6 +98,14 @@ progress:
 ## Blockers
 
 None currently.
+
+## Needs Verification
+
+- `workout_presence` Firestore rules are written and scoped but have not been
+  exercised against the emulator.
+- The Capacitor shell generates and bundles correctly (`npx cap add android`
+  was run successfully), but no APK has been compiled — that needs the Android
+  SDK and JDK 17.
 
 ## Notes
 
