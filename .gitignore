@@ -25,9 +25,16 @@ database_scalability_report.md
 
 # Dependencies & Node modules
 node_modules/
-package.json
-package-lock.json
+/package.json
+/package-lock.json
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+
+# Capacitor native shell. The config, sync script and docs under native/ are
+# tracked; the copied web bundle and generated platform project are not.
+native/www/
+native/android/
+native/node_modules/
+native/package-lock.json

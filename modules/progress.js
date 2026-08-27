@@ -1,4 +1,5 @@
-import { collections, dateLabel, emptyState, escapeHtml, findName, formData, nameCell, optionList, pageHeader, today, trendChart, withButtonLoading, getBadgeCss, renderBadgeIcon, getMemberTier, getBadgeClass } from "./utils.js";
+import { collections, dateLabel, emptyState, escapeHtml, findName, formData, nameCell, optionList, pageHeader, today, trendChart, withButtonLoading, getBadgeCss, renderBadgeIcon, getMemberTier, getBadgeClass, getExercises, findExerciseByName, exerciseCategory } from "./utils.js";
+import { loggedExercises, exerciseSeries, exerciseSummary, effortBreakdown, muscleBalance, activityHeatmap, HEATMAP_BLOCKS } from "./workout-analytics.js";
 
 const METRICS = [
   { key: "weight", label: "Weight (kg)", color: "var(--teal)" },
@@ -9,6 +10,7 @@ const METRICS = [
 
 export const progressModule = {
   activeTab: "metrics",
+  analyticsExercise: null, // exercise name focused in the Training Analytics tab
   render(context) {
     if (context.profile?.role === "member") {
       return renderMemberProgress(context);
@@ -114,8 +116,19 @@ function renderMemberProgress(context) {
       <button class="tab-btn ${activeTab === "badges" ? "active" : ""}" data-progress-tab="badges" style="padding: 8px 16px; font-size: 0.85rem;">
         Badges & PRs
       </button>
+      <button class="tab-btn ${activeTab === "training" ? "active" : ""}" data-progress-tab="training" style="padding: 8px 16px; font-size: 0.85rem;">
+        Training Analytics
+      </button>
     </div>
   `;
+
+  if (activeTab === "training") {
+    return `
+      ${pageHeader("Progress")}
+      ${tabHeader}
+      ${renderTrainingAnalytics(context, me)}
+    `;
+  }
 
   if (activeTab === "metrics") {
     const records = (context.data.progress_records || [])
@@ -272,6 +285,245 @@ function renderMemberProgress(context) {
   }
 }
 
+// ---- Training Analytics (per-exercise curves, effort, balance, heatmap) ----
+
+function renderTrainingAnalytics(context, me) {
+  const logs = (context.data.workout_logs || []).filter((log) => log.memberId === me.id);
+  const exercises = loggedExercises(logs);
+
+  if (!exercises.length) {
+    return emptyState(
+      "No training data yet",
+      "Log a workout and tick off your sets — your strength curves, effort profile and muscle balance build up from there."
+    );
+  }
+
+  // Default to the most-trained exercise; keep the current choice if still valid.
+  const chosen =
+    exercises.find((ex) => ex.name === progressModule.analyticsExercise)?.name || exercises[0].name;
+  progressModule.analyticsExercise = chosen;
+
+  const summary = exerciseSummary(logs, chosen);
+  const series = exerciseSeries(logs, chosen);
+  const effort = effortBreakdown(logs);
+  // The exercise library loads lazily; until it resolves every lookup misses and
+  // the balance card shows its loading state rather than a chart of zeros.
+  const balance = muscleBalance(logs, (name) => exerciseCategory(findExerciseByName(name)));
+  const heat = activityHeatmap(logs);
+
+  return `
+    ${renderExerciseCard(exercises, chosen, summary, series)}
+    <div class="analytics-grid">
+      ${renderBalanceCard(balance)}
+      ${renderEffortCard(effort)}
+    </div>
+    ${renderHeatmapCard(heat)}
+  `;
+}
+
+function renderExerciseCard(exercises, chosen, summary, series) {
+  const oneRmSeries = series
+    .filter((point) => point.oneRepMax > 0)
+    .map((point) => ({ label: dateLabel(point.date), value: point.oneRepMax }));
+
+  const trend = summary && summary.changePct !== null
+    ? `<span class="analytics-delta ${summary.changePct >= 0 ? "up" : "down"}">
+         <span class="material-symbols-outlined">${summary.changePct >= 0 ? "trending_up" : "trending_down"}</span>
+         ${summary.changePct >= 0 ? "+" : ""}${summary.changePct}%
+       </span>`
+    : `<span class="analytics-delta neutral">Not enough sessions for a trend</span>`;
+
+  return `
+    <section class="panel">
+      <div class="panel-heading">
+        <h2>Exercise Progress</h2>
+        <select data-analytics-exercise aria-label="Choose exercise">
+          ${exercises.map((ex) => `
+            <option value="${escapeHtml(ex.name)}" ${ex.name === chosen ? "selected" : ""}>
+              ${escapeHtml(ex.name)} (${ex.sessions})
+            </option>
+          `).join("")}
+        </select>
+      </div>
+
+      <div class="analytics-stat-row">
+        ${statTile("Estimated 1RM", summary?.currentOneRepMax ? `${summary.currentOneRepMax} kg` : "—", "Epley estimate from your latest session")}
+        ${statTile("Best ever", summary?.bestOneRepMax ? `${summary.bestOneRepMax} kg` : "—", "Highest estimated 1RM you have hit")}
+        ${statTile("Sessions", String(summary?.sessions || 0), "Times you have trained this lift")}
+        ${statTile("Total volume", `${(summary?.totalVolume || 0).toLocaleString()} kg`, "Weight x reps across every completed set")}
+      </div>
+
+      <div class="analytics-trend-head">
+        <strong>Estimated 1RM over time</strong>
+        ${trend}
+      </div>
+      ${oneRmSeries.length
+        ? trendChart(oneRmSeries, { color: "var(--teal)" })
+        : `<div class="table-empty">Log weighted sets of 12 reps or fewer to estimate your 1RM.</div>`}
+    </section>
+  `;
+}
+
+function statTile(label, value, hint) {
+  return `
+    <div class="analytics-stat" title="${escapeHtml(hint)}">
+      <span class="analytics-stat-label">${escapeHtml(label)}</span>
+      <strong class="analytics-stat-value">${escapeHtml(value)}</strong>
+    </div>
+  `;
+}
+
+function renderBalanceCard(balance) {
+  // Nothing mapped but sets present means the library has not loaded yet (or the
+  // member only logs custom lifts) — an all-zero chart would mislead.
+  const noneMapped = balance.totalSets === 0 && balance.unmapped > 0;
+
+  return `
+    <section class="panel" data-balance-card>
+      <div class="panel-heading">
+        <h2>Muscle Balance</h2>
+        <span>${balance.totalSets} sets mapped</span>
+      </div>
+      ${noneMapped
+        ? `<div class="table-empty">Matching your lifts to muscle groups… if this persists, the exercises you logged are custom ones with no muscle data.</div>`
+        : `<div class="body-map-layout">
+            ${renderBodyMap(balance)}
+            <div class="muscle-balance stack">
+              ${balance.groups.map((group) => `
+                <div class="muscle-row">
+                  <span class="muscle-label">${escapeHtml(group.label)}</span>
+                  <span class="muscle-bar"><span style="width:${group.share}%"></span></span>
+                  <span class="muscle-value">${group.sets} <small>(${group.pct}%)</small></span>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+          ${balance.unmapped
+            ? `<p class="analytics-footnote">${balance.unmapped} set${balance.unmapped === 1 ? "" : "s"} from custom exercises could not be mapped to a muscle group.</p>`
+            : ""}`}
+    </section>
+  `;
+}
+
+// Anatomical body map. A stylised front/back figure whose regions are shaded by
+// training share, so a neglected group is visible at a glance rather than having
+// to be read off a bar. Colour comes from a single accent at varying opacity, so
+// it stays legible in both themes and for colour-vision deficiency; every region
+// also carries a title and its set count is in the bars beside it.
+function renderBodyMap(balance) {
+  const share = {};
+  balance.groups.forEach((group) => {
+    share[group.key] = group.share;
+  });
+
+  // Opacity floor keeps an untrained region visible as an outline rather than
+  // vanishing into the background.
+  const fill = (key) => {
+    const value = share[key] || 0;
+    const opacity = value === 0 ? 0.08 : 0.2 + (value / 100) * 0.8;
+    return `fill="var(--accent, var(--primary))" fill-opacity="${opacity.toFixed(2)}"`;
+  };
+  const label = (key) => {
+    const group = balance.groups.find((g) => g.key === key);
+    return group ? `${group.label}: ${group.sets} set${group.sets === 1 ? "" : "s"} (${group.pct}%)` : key;
+  };
+  const region = (key, shape) => `<g class="body-region" ${fill(key)}><title>${escapeHtml(label(key))}</title>${shape}</g>`;
+
+  return `
+    <div class="body-map" role="img" aria-label="Muscle balance body map. ${escapeHtml(balance.groups.map((g) => `${g.label} ${g.pct}%`).join(", "))}">
+      <svg viewBox="0 0 200 150" preserveAspectRatio="xMidYMid meet">
+        <g stroke="var(--line)" stroke-width="0.8">
+          <!-- Front view -->
+          <circle cx="50" cy="18" r="9" fill="none" />
+          ${region("shoulders", '<ellipse cx="34" cy="35" rx="8" ry="6" /><ellipse cx="66" cy="35" rx="8" ry="6" />')}
+          ${region("chest", '<rect x="36" y="31" width="28" height="18" rx="5" />')}
+          ${region("core", '<rect x="39" y="50" width="22" height="22" rx="4" />')}
+          ${region("arms", '<rect x="24" y="40" width="9" height="30" rx="4" /><rect x="67" y="40" width="9" height="30" rx="4" />')}
+          ${region("legs", '<rect x="38" y="73" width="11" height="46" rx="5" /><rect x="51" y="73" width="11" height="46" rx="5" />')}
+          <text x="50" y="136" text-anchor="middle" class="body-map-caption">Front</text>
+
+          <!-- Back view -->
+          <circle cx="150" cy="18" r="9" fill="none" />
+          ${region("shoulders", '<ellipse cx="134" cy="35" rx="8" ry="6" /><ellipse cx="166" cy="35" rx="8" ry="6" />')}
+          ${region("back", '<rect x="136" y="31" width="28" height="30" rx="5" />')}
+          ${region("core", '<rect x="139" y="62" width="22" height="10" rx="3" />')}
+          ${region("arms", '<rect x="124" y="40" width="9" height="30" rx="4" /><rect x="167" y="40" width="9" height="30" rx="4" />')}
+          ${region("legs", '<rect x="138" y="73" width="11" height="46" rx="5" /><rect x="151" y="73" width="11" height="46" rx="5" />')}
+          <text x="150" y="136" text-anchor="middle" class="body-map-caption">Back</text>
+        </g>
+      </svg>
+    </div>
+  `;
+}
+
+function renderEffortCard(effort) {
+  return `
+    <section class="panel">
+      <div class="panel-heading">
+        <h2>Effort Profile</h2>
+        <span>${effort.averageRpe ? `Avg RPE ${effort.averageRpe} · ${effort.averageRir} RIR` : "No effort logged"}</span>
+      </div>
+      ${effort.rows.length
+        ? `<div class="effort-list stack">
+            ${effort.rows.map((row) => `
+              <div class="muscle-row">
+                <span class="muscle-label" title="${row.rir} rep${row.rir === 1 ? "" : "s"} in reserve">RPE ${row.rpe} <small>(${row.rir} RIR)</small></span>
+                <span class="muscle-bar"><span style="width:${row.pct}%"></span></span>
+                <span class="muscle-value">${row.count} <small>(${row.pct}%)</small></span>
+              </div>
+            `).join("")}
+          </div>
+          ${effort.unrated
+            ? `<p class="analytics-footnote">${effort.unrated} completed set${effort.unrated === 1 ? "" : "s"} had no RPE recorded.</p>`
+            : ""}`
+        : `<div class="table-empty">Pick an RPE (or reps in reserve) when you log a set to see how hard your sessions really are.</div>`}
+    </section>
+  `;
+}
+
+const HEATMAP_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+function renderHeatmapCard(heat) {
+  if (!heat.max) {
+    return `
+      <section class="panel" style="margin-top:18px;">
+        <div class="panel-heading"><h2>When You Train</h2></div>
+        <div class="table-empty">Complete a few sessions to see which days and times you train most.</div>
+      </section>
+    `;
+  }
+
+  return `
+    <section class="panel" style="margin-top:18px;">
+      <div class="panel-heading">
+        <h2>When You Train</h2>
+        <span>Sets logged by day and time</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="heatmap-table">
+          <thead>
+            <tr>
+              <th scope="col"></th>
+              ${HEATMAP_BLOCKS.map((block) => `<th scope="col">${escapeHtml(block)}</th>`).join("")}
+            </tr>
+          </thead>
+          <tbody>
+            ${HEATMAP_DAYS.map((day, dayIdx) => `
+              <tr>
+                <th scope="row">${day}</th>
+                ${heat.grid[dayIdx].map((value, blockIdx) => {
+                  const level = value === 0 ? 0 : Math.max(1, Math.ceil((value / heat.max) * 4));
+                  return `<td class="heatmap-cell ${level ? `level-${level}` : ""}" title="${value} set${value === 1 ? "" : "s"} on ${day} (${HEATMAP_BLOCKS[blockIdx]})">${value || ""}</td>`;
+                }).join("")}
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  `;
+}
+
 function bindMemberProgress(root, context) {
   const tabButtons = root.querySelectorAll("[data-progress-tab]");
   tabButtons.forEach(btn => {
@@ -283,6 +535,29 @@ function bindMemberProgress(root, context) {
 
   const me = context.myMember;
   if (!me || progressModule.activeTab === "badges") return;
+
+  if (progressModule.activeTab === "training") {
+    // Muscle balance needs the exercise library for its name -> category lookup.
+    // It is cached after the first fetch, so re-render only when it just arrived.
+    const balanceCard = root.querySelector("[data-balance-card]");
+    if (balanceCard && !findExerciseByName("bench press")) {
+      getExercises().then(() => {
+        // Swap just this card in — a full refreshView() would re-read the
+        // backend and rebuild the page merely to fill in one chart.
+        if (!balanceCard.isConnected) return;
+        const logs = (context.data.workout_logs || []).filter((log) => log.memberId === me.id);
+        balanceCard.outerHTML = renderBalanceCard(
+          muscleBalance(logs, (name) => exerciseCategory(findExerciseByName(name)))
+        );
+      }).catch(() => {});
+    }
+
+    root.querySelector("[data-analytics-exercise]")?.addEventListener("change", (event) => {
+      progressModule.analyticsExercise = event.target.value;
+      context.refreshView();
+    });
+    return;
+  }
 
   const metricSel = root.querySelector("[data-chart-metric]");
   const chartBox = root.querySelector("[data-chart]");

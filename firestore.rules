@@ -132,6 +132,38 @@ service cloud.firestore {
       allow update, delete: if owner() && sameGym();
     }
 
+    // Live "who is training now" presence. Rows are ephemeral heartbeats written
+    // by the member mid-workout and deleted when they finish; a stale row simply
+    // ages out client-side. A member may only write and remove their own row.
+    match /workout_presence/{docId} {
+      allow read: if sameGym();
+      allow create: if incomingSameGym() && (
+        owner()
+        || (
+          myRole() == "member"
+          && request.resource.data.gymId == myGymId()
+          && exists(/databases/$(database)/documents/members/$(request.resource.data.memberId))
+          && get(/databases/$(database)/documents/members/$(request.resource.data.memberId)).data.uid == uid()
+        )
+      );
+      allow update: if sameGym() && incomingSameGym() && (
+        owner()
+        || (
+          myRole() == "member"
+          && exists(/databases/$(database)/documents/members/$(resource.data.memberId))
+          && get(/databases/$(database)/documents/members/$(resource.data.memberId)).data.uid == uid()
+        )
+      );
+      allow delete: if sameGym() && (
+        owner()
+        || (
+          myRole() == "member"
+          && exists(/databases/$(database)/documents/members/$(resource.data.memberId))
+          && get(/databases/$(database)/documents/members/$(resource.data.memberId)).data.uid == uid()
+        )
+      );
+    }
+
     // Trainer roster. Owner manages freely; a self-registering trainer may create
     // only their own Pending roster row (linked by uid).
     match /trainers/{docId} {

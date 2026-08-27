@@ -14,6 +14,7 @@ export const collections = {
   exerciseLibrary: "exercise_library",
   workoutLogs: "workout_logs",
   workoutSchedules: "workout_schedules",
+  workoutPresence: "workout_presence",
   badges: "badges"
 };
 
@@ -495,13 +496,39 @@ export function getExercisesList() {
   return exercisesList;
 }
 
+// Base for the bundled exercise media set (thumbnails + animated demos).
+const EXERCISE_MEDIA_BASE = "https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/";
+
+// Absolute URL for an exercise's animated demo, or "" when it has none
+// (member-created custom exercises carry no media).
+export function exerciseGifUrl(exercise) {
+  return exercise?.gif ? EXERCISE_MEDIA_BASE + exercise.gif : "";
+}
+
+// Absolute URL for an exercise's still thumbnail, falling back to the demo.
+export function exerciseImageUrl(exercise) {
+  if (exercise?.image) return EXERCISE_MEDIA_BASE + exercise.image;
+  return exerciseGifUrl(exercise);
+}
+
+// The dataset stores the muscle region under `category`; older UI code looked
+// for `bodyPart`, which no record actually has. Accept either.
+export function exerciseCategory(exercise) {
+  return exercise?.category || exercise?.bodyPart || "";
+}
+
+// Looks an exercise up in the loaded library by name (logs store names, not ids).
+export function findExerciseByName(name) {
+  const key = String(name || "").trim().toLowerCase();
+  if (!key) return null;
+  return (exercisesList || []).find((ex) => String(ex.name || "").trim().toLowerCase() === key) || null;
+}
+
 export function showExerciseModal(exercise) {
   const overlay = document.createElement("div");
   overlay.className = "modal-overlay";
   
-  const gifUrl = exercise.gif 
-    ? `https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/${exercise.gif}`
-    : '';
+  const gifUrl = exerciseGifUrl(exercise);
   
   overlay.innerHTML = `
     <div class="modal" role="dialog" aria-modal="true" style="width: min(540px, 100%);">
@@ -518,16 +545,26 @@ export function showExerciseModal(exercise) {
           </div>
         ` : ''}
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <span style="background: var(--surface-light, rgba(255,255,255,0.05)); border: 1px solid var(--line); padding: 4px 8px; border-radius: var(--r-sm); font-size: 0.85em;">Category: <strong>${escapeHtml(exercise.category)}</strong></span>
-          <span style="background: var(--surface-light, rgba(255,255,255,0.05)); border: 1px solid var(--line); padding: 4px 8px; border-radius: var(--r-sm); font-size: 0.85em;">Target: <strong>${escapeHtml(exercise.target)}</strong></span>
-          <span style="background: var(--surface-light, rgba(255,255,255,0.05)); border: 1px solid var(--line); padding: 4px 8px; border-radius: var(--r-sm); font-size: 0.85em;">Equipment: <strong>${escapeHtml(exercise.equipment)}</strong></span>
+          ${[
+            ["Category", exerciseCategory(exercise)],
+            ["Target", exercise.target],
+            ["Equipment", exercise.equipment]
+          ].filter(([, value]) => value).map(([label, value]) => `
+            <span style="background: var(--surface-light, rgba(255,255,255,0.05)); border: 1px solid var(--line); padding: 4px 8px; border-radius: var(--r-sm); font-size: 0.85em;">${label}: <strong>${escapeHtml(value)}</strong></span>
+          `).join("")}
         </div>
-        <div style="border-top: 1px solid var(--line); padding-top: 10px;">
-          <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 1.1rem;">Instructions</h3>
-          <ol style="padding-left: 20px; margin: 0; line-height: 1.55; color: var(--text);">
-            ${exercise.steps.map(step => `<li style="margin-bottom: 8px;">${escapeHtml(step)}</li>`).join('')}
-          </ol>
-        </div>
+        ${(exercise.steps || []).length ? `
+          <div style="border-top: 1px solid var(--line); padding-top: 10px;">
+            <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 1.1rem;">Instructions</h3>
+            <ol style="padding-left: 20px; margin: 0; line-height: 1.55; color: var(--text);">
+              ${exercise.steps.map(step => `<li style="margin-bottom: 8px;">${escapeHtml(step)}</li>`).join('')}
+            </ol>
+          </div>
+        ` : `
+          <div style="border-top: 1px solid var(--line); padding-top: 10px; color: var(--muted); font-size: 0.9rem;">
+            No instructions recorded for this exercise.
+          </div>
+        `}
       </div>
     </div>
   `;
