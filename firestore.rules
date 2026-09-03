@@ -50,8 +50,7 @@ service cloud.firestore {
       allow get: if true;
       allow list: if false;
       allow create: if signedIn()
-        && request.resource.data.gymId == uid()
-        && request.resource.data.gymName == gymName;
+        && request.resource.data.gymId == uid();
       allow update, delete: if false;
     }
 

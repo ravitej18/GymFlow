@@ -72,7 +72,10 @@ export const attendanceModule = {
           <div class="panel-heading" style="flex-wrap: wrap; gap: 8px;">
             <h2>Recent Check-ins</h2>
             <span>${filteredRecords.length} records</span>
-            <button class="ghost-button compact mobile-only-btn" style="margin-left: auto;" data-scroll-to-form>
+            <button class="ghost-button compact" data-action="refresh-checkins" style="margin-left: auto; display: flex; align-items: center; gap: 4px;">
+              <span class="material-symbols-outlined" style="font-size:16px;">refresh</span> Refresh
+            </button>
+            <button class="ghost-button compact mobile-only-btn" data-scroll-to-form>
               <span class="material-symbols-outlined" style="font-size:16px;">how_to_reg</span> Check In
             </button>
           </div>
@@ -117,6 +120,16 @@ export const attendanceModule = {
         this.activeFilter = btn.dataset.filter;
         context.refreshView();
       });
+    });
+
+    root.querySelector("[data-action='refresh-checkins']")?.addEventListener("click", async () => {
+      const refreshBtn = root.querySelector("[data-action='refresh-checkins']");
+      await withButtonLoading(refreshBtn, async () => {
+        const freshList = await context.services.data.list("attendance");
+        context.data.attendance = freshList;
+        context.toast("Check-ins updated from database.");
+        context.refreshView();
+      }, "Refreshing...");
     });
 
     const form = root.querySelector("#attendance-form");
@@ -205,7 +218,7 @@ function renderMemberAttendance(context) {
     `;
   }
   const status = me.status === "Pending" ? "Pending" : memberStatus(me);
-  if (status !== "Active") {
+  if (status !== "Active" && status !== "Expiring Soon") {
     return `
       ${pageHeader("Check-ins")}
       ${emptyState("Membership not active", `Your current membership status is ${status}. Access is restricted.`)}
@@ -256,7 +269,7 @@ function bindMemberAttendance(root, context) {
   if (!button || !me) return;
   button.addEventListener("click", async () => {
     const status = me.status === "Pending" ? "Pending" : memberStatus(me);
-    if (status !== "Active") {
+    if (status !== "Active" && status !== "Expiring Soon") {
       context.toast(`Cannot check in: Your membership status is ${status}.`);
       return;
     }

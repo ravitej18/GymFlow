@@ -1,0 +1,38 @@
+# CodeRabbit Configuration File
+# https://docs.coderabbit.ai/configure-coderabbit/
+
+version: "2"
+language: "en-US"
+tone_instructions: "Be concise, precise, and constructive. Focus on code quality, security, and edge cases."
+
+reviews:
+  profile: "chill"
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - main
+      - master
+      - develop
+  path_filters:
+    - "!node_modules/**"
+    - "!*.min.js"
+    - "!package-lock.json"
+    - "!dist/**"
+  path_instructions:
+    - path: "modules/*.js"
+      instructions: "Verify screen modules export render(context) returning clean HTML strings, and bind(root, context) for DOM event handlers."
+    - path: "lib/firebase-init.js"
+      instructions: "Ensure proper fallback abstraction between Firebase Firestore/Auth and browser localStorage demo mode."
+    - path: "firestore.rules"
+      instructions: "Ensure strict role-based access control (Owner, Trainer, Member) and multi-tenant gymId isolation."
+    - path: "tests/**"
+      instructions: "Ensure E2E tests properly clean up test state and avoid flaky selectors."
+
+chat:
+  auto_reply: true

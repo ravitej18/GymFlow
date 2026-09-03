@@ -55,7 +55,63 @@ function renderMemberForm(member, plans, trainers) {
         ` : ""}
         ${renderSharedMemberFields(member || {})}
       </div>
-      <label class="wide checkbox-label" style="margin-top: 10px;">
+
+      <!-- Pricing & Discount Customization Panel -->
+      <div style="margin-top: 18px; padding: 18px; background: var(--surface-2, rgba(255,255,255,0.03)); border-radius: var(--r-md); border: 1.5px dashed var(--line);">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 12px; flex-wrap:wrap; gap:8px;">
+          <h3 style="margin: 0; font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 8px; color: var(--text);">
+            <span class="material-symbols-outlined" style="font-size: 1.2rem; color: var(--primary);">sell</span>
+            Pricing &amp; Discount Offer
+          </h3>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Customize plan fee or apply percentage/amount discount</span>
+        </div>
+        <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+          <label>Discount / Pricing Rule
+            <select name="discountType" id="discount-type-select">
+              <option value="none" ${member?.discountType === "none" || !member?.discountType ? "selected" : ""}>Standard Plan Price (No Discount)</option>
+              <option value="percentage" ${member?.discountType === "percentage" ? "selected" : ""}>Percentage Discount (%)</option>
+              <option value="fixed" ${member?.discountType === "fixed" ? "selected" : ""}>Fixed Reduction Amount (₹ Off)</option>
+              <option value="custom" ${member?.discountType === "custom" ? "selected" : ""}>Custom Fee (Direct Override)</option>
+            </select>
+          </label>
+          <label id="discount-val-group" class="${(member?.discountType && member?.discountType !== "none") ? "" : "hidden"}">
+            <span id="discount-val-label">Discount Value</span>
+            <input name="discountValue" type="number" id="discount-val-input" min="0" step="any" placeholder="0" value="${member?.discountValue ?? 0}" />
+          </label>
+          <label>Payment Method
+            <select name="paymentMethod">
+              <option value="Cash" ${member?.paymentMethod === "Cash" ? "selected" : ""}>Cash</option>
+              <option value="UPI" ${member?.paymentMethod === "UPI" ? "selected" : ""}>UPI</option>
+              <option value="Card" ${member?.paymentMethod === "Card" ? "selected" : ""}>Card</option>
+              <option value="Bank Transfer" ${member?.paymentMethod === "Bank Transfer" ? "selected" : ""}>Bank Transfer</option>
+            </select>
+          </label>
+          <label>Payment Status
+            <select name="paymentStatus">
+              <option value="Paid" ${(member?.paymentStatus || "Paid") === "Paid" ? "selected" : ""}>Paid</option>
+              <option value="Pending" ${member?.paymentStatus === "Pending" ? "selected" : ""}>Pending</option>
+            </select>
+          </label>
+        </div>
+
+        <!-- Live Price Calculation Box -->
+        <div id="price-calc-box" style="margin-top: 14px; padding: 14px 18px; background: var(--surface); border-radius: var(--r-sm); border: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">
+              Standard Plan Price: <span id="calc-std-price" style="font-weight: 700; color: var(--text);">₹0</span>
+            </div>
+            <div id="calc-discount-row" style="font-size: 0.85rem; color: #10b981; font-weight: 600; margin-top: 2px; display: none;">
+              Discount Applied: <span id="calc-discount-amount">-₹0</span>
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">Final Payable Price</div>
+            <div id="calc-final-price" style="font-size: 1.35rem; font-weight: 800; color: var(--primary);">₹0</div>
+          </div>
+        </div>
+      </div>
+
+      <label class="wide checkbox-label" style="margin-top: 14px;">
         <input type="checkbox" name="whatsappOptIn" value="true" ${(isEdit ? member.whatsappOptIn : true) ? "checked" : ""} />
         Consent to WhatsApp reminders about membership &amp; renewals
       </label>
@@ -277,12 +333,79 @@ export const membersModule = {
       const form = root.querySelector("#member-form");
       if (!form) return;
 
+      const currency = context.settings?.currency || "INR";
+
+      const updatePriceCalculation = () => {
+        const plan = context.data.membership_plans.find((item) => item.id === form.planId.value);
+        const stdPrice = plan ? Number(plan.price || 0) : 0;
+        
+        const type = form.discountType?.value || "none";
+        const valInput = form.discountValue;
+        const valGroup = root.querySelector("#discount-val-group");
+        const valLabel = root.querySelector("#discount-val-label");
+        const stdPriceEl = root.querySelector("#calc-std-price");
+        const discRow = root.querySelector("#calc-discount-row");
+        const discAmtEl = root.querySelector("#calc-discount-amount");
+        const finalPriceEl = root.querySelector("#calc-final-price");
+
+        if (type === "none") {
+          valGroup?.classList.add("hidden");
+        } else {
+          valGroup?.classList.remove("hidden");
+          if (type === "percentage") {
+            if (valLabel) valLabel.textContent = "Discount Percentage (%)";
+            if (valInput) valInput.placeholder = "e.g. 10 for 10%";
+          } else if (type === "fixed") {
+            if (valLabel) valLabel.textContent = "Reduction Amount (₹ Off)";
+            if (valInput) valInput.placeholder = "e.g. 500 for ₹500 off";
+          } else if (type === "custom") {
+            if (valLabel) valLabel.textContent = "Custom Fee (Direct Override)";
+            if (valInput) valInput.placeholder = "e.g. 1500 for ₹1500 total";
+          }
+        }
+
+        let val = Math.max(0, Number(valInput?.value) || 0);
+        let discAmount = 0;
+        let finalPrice = stdPrice;
+
+        if (type === "percentage") {
+          val = Math.min(100, val);
+          discAmount = (stdPrice * val) / 100;
+          finalPrice = Math.max(0, stdPrice - discAmount);
+        } else if (type === "fixed") {
+          discAmount = Math.min(stdPrice, val);
+          finalPrice = Math.max(0, stdPrice - discAmount);
+        } else if (type === "custom") {
+          finalPrice = val;
+          discAmount = Math.max(0, stdPrice - finalPrice);
+        }
+
+        if (stdPriceEl) stdPriceEl.textContent = `${currency} ${stdPrice.toLocaleString()}`;
+        if (finalPriceEl) finalPriceEl.textContent = `${currency} ${finalPrice.toLocaleString()}`;
+        
+        if (discRow && discAmtEl) {
+          if (discAmount > 0) {
+            discRow.style.display = "block";
+            discAmtEl.textContent = `- ${currency} ${discAmount.toLocaleString()} ${type === "percentage" ? `(${val}% Off)` : ""}`;
+          } else {
+            discRow.style.display = "none";
+          }
+        }
+      };
+
       form.planId.addEventListener("change", () => {
         const plan = context.data.membership_plans.find((item) => item.id === form.planId.value);
         if (plan && form.startDate.value) {
           form.endDate.value = addDays(form.startDate.value, plan.durationDays);
         }
+        updatePriceCalculation();
       });
+
+      form.discountType?.addEventListener("change", updatePriceCalculation);
+      form.discountValue?.addEventListener("input", updatePriceCalculation);
+
+      // Run initial calculation
+      updatePriceCalculation();
 
       form.startDate.addEventListener("change", () => {
         const plan = context.data.membership_plans.find((item) => item.id === form.planId.value);
@@ -380,6 +503,35 @@ export const membersModule = {
         const hasMeasurements = Object.values(measurements).some((v) => v !== "");
         payload.status = payload.status === "Suspended" ? "Suspended" : memberStatus(payload);
         
+        // Calculate price and discount values for member & payment record
+        const plan = context.data.membership_plans.find((p) => p.id === payload.planId);
+        const stdPrice = plan ? Number(plan.price || 0) : 0;
+        const discType = payload.discountType || "none";
+        const discVal = Math.max(0, Number(payload.discountValue) || 0);
+
+        let discAmount = 0;
+        let finalPrice = stdPrice;
+
+        if (discType === "percentage") {
+          const pct = Math.min(100, discVal);
+          discAmount = (stdPrice * pct) / 100;
+          finalPrice = Math.max(0, stdPrice - discAmount);
+        } else if (discType === "fixed") {
+          discAmount = Math.min(stdPrice, discVal);
+          finalPrice = Math.max(0, stdPrice - discAmount);
+        } else if (discType === "custom") {
+          finalPrice = discVal;
+          discAmount = Math.max(0, stdPrice - finalPrice);
+        }
+
+        payload.originalPrice = stdPrice;
+        payload.discountType = discType;
+        payload.discountValue = discVal;
+        payload.discountAmount = discAmount;
+        payload.customPrice = finalPrice;
+        payload.paymentMethod = payload.paymentMethod || "Cash";
+        payload.paymentStatus = payload.paymentStatus || "Paid";
+
         await withButtonLoading(form.querySelector("[type='submit']"), async () => {
           const saved = await context.services.data.save(collections.members, payload);
           if (isNew && hasMeasurements) {
@@ -401,18 +553,33 @@ export const membersModule = {
           }
 
           if (isNew && saved.planId) {
-            const plan = context.data.membership_plans.find((p) => p.id === saved.planId);
-            const amount = plan ? Number(plan.price || 0) : 0;
+            let noteText = `Admission payment for ${plan ? plan.planName : "plan"}`;
+            if (discAmount > 0) {
+              if (discType === "percentage") {
+                noteText += ` (${discVal}% discount applied: -${currency} ${discAmount})`;
+              } else if (discType === "fixed") {
+                noteText += ` (Fixed reduction of ${currency} ${discVal} applied)`;
+              } else if (discType === "custom") {
+                noteText += ` (Custom fee offer applied: ${currency} ${finalPrice})`;
+              }
+            } else {
+              noteText += ` (Standard plan price)`;
+            }
+
             const paymentRecord = {
               memberId: saved.id,
               planId: saved.planId,
-              amount,
+              originalPrice: stdPrice,
+              discountType: discType,
+              discountValue: discVal,
+              discountAmount: discAmount,
+              amount: finalPrice,
               date: saved.startDate || today(),
-              method: "Cash",
+              method: payload.paymentMethod || "Cash",
               collectedBy: context.profile?.name || "Owner",
-              status: "Paid",
+              status: payload.paymentStatus || "Paid",
               receiptNumber: `RCPT-${Date.now().toString().slice(-8)}`,
-              notes: `Auto-recorded admission payment for ${plan ? plan.planName : "plan"}`
+              notes: noteText
             };
             const savedPayment = await context.services.data.save(collections.payments, paymentRecord);
             context.applyChange(collections.payments, savedPayment);

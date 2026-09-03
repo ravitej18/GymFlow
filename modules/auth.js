@@ -12,8 +12,8 @@ export function renderAuth(root, context) {
     <main class="auth-layout">
       <section class="auth-visual">
         <div class="auth-brand">
-          <div class="brand-mark large">GF</div>
-          <h1>GymFlow</h1>
+          <div class="brand-mark large">${escapeHtml((window.GYM_CONFIG?.appName || "Grip Gym").slice(0, 2).toUpperCase())}</div>
+          <h1>${escapeHtml(window.GYM_CONFIG?.appName || "Grip Gym")}</h1>
           <p>Manage members, payments, renewals, trainers, and daily operations from a static web app.</p>
         </div>
       </section>
@@ -34,7 +34,7 @@ export function renderAuth(root, context) {
           <button class="primary-button" type="submit">Login</button>
           <button class="link-button" type="button" data-action="reset-password">Forgot password</button>
           ${context.mode === "local" ? `<button class="ghost-button" type="button" data-action="demo">Open demo workspace</button>` : ""}
-          <button class="ghost-button" type="button" data-action="guest" style="margin-top: 12px; background: rgba(16, 185, 129, 0.08); border-color: var(--teal); color: var(--teal-ink); font-weight: 600; width: 100%;">Try GymFlow as a Guest</button>
+          <button class="ghost-button" type="button" data-action="guest" style="margin-top: 12px; background: rgba(16, 185, 129, 0.08); border-color: var(--teal); color: var(--teal-ink); font-weight: 600; width: 100%;">Try as Guest</button>
         </form>
 
         <div id="register-panel" class="stack ${isInvite ? "" : "hidden"}">
@@ -45,7 +45,7 @@ export function renderAuth(root, context) {
           </div>
 
           <form id="register-form" class="stack auth-form ${isInvite ? "hidden" : ""}">
-            <label>Gym name<input name="gymName" required maxlength="80" /></label>
+            <label>Gym name<input name="gymName" value="${escapeHtml(window.GYM_CONFIG?.appName || "Grip Gym")}" required maxlength="80" /></label>
             <label>Your name<input name="name" autocomplete="name" required maxlength="80" /></label>
             <label>Email<input name="email" type="email" autocomplete="email" required /></label>
             <label>Password
@@ -117,9 +117,6 @@ export function renderAuth(root, context) {
         </div>
 
         <p class="auth-note">${escapeHtml(context.mode === "firebase" ? "Your gym data is saved and synced automatically." : "Running in demo mode on this device.")}</p>
-        <footer class="auth-footer">
-          Made with <span class="heart">❤️</span> by <a href="https://github.com/SriSatyaLokesh" target="_blank" rel="noopener noreferrer">SriSatyaLokesh</a> &amp; <a href="https://github.com/ravitej18" target="_blank" rel="noopener noreferrer">Raviteja</a>
-        </footer>
       </section>
     </main>
     <div class="toast" data-auth-toast></div>

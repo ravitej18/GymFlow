@@ -3,7 +3,10 @@ import { collections, dateLabel, emptyState, escapeHtml, findName, formData, get
 async function _drawReceiptCanvas(payment, member, plan, settings) {
   const DPR    = 2;
   const WIDTH  = 380;
-  const CANVAS_H = 510;
+  const origPrice = Number(payment.originalPrice || (payment.amount + (payment.discountAmount || 0)));
+  const discAmt = Number(payment.discountAmount || (origPrice > payment.amount ? origPrice - payment.amount : 0));
+  const HAS_DISC = discAmt > 0;
+  const CANVAS_H = HAS_DISC ? 535 : 510;
   const PADX   = 22;
   const FONT   = '"Courier New", Courier, monospace';
   const _gymName  = (settings?.gymName || 'GymFlow').trim();
@@ -122,17 +125,44 @@ async function _drawReceiptCanvas(payment, member, plan, settings) {
 
   dSep();
 
-  // 6. Particular Line
-  ctx.font      = `11px ${FONT}`;
-  ctx.fillStyle = '#000000';
-  ctx.textAlign = 'left';
+  // 6. Particular Line & Discount Breakdown
   const planName = (plan?.planName || "Membership Plan").toUpperCase();
-  ctx.fillText(planName, PADX, y);
-  ctx.textAlign = 'right';
-  ctx.fillText(payment.status.toUpperCase(), C_QTY, y);
-  ctx.font      = `bold 11px ${FONT}`;
-  ctx.fillText(`${_currency} ${payment.amount.toFixed(2)}`, C_AMT, y);
-  y += 24;
+
+  if (HAS_DISC) {
+    // Row A: Standard Price
+    ctx.font      = `11px ${FONT}`;
+    ctx.fillStyle = '#000000';
+    ctx.textAlign = 'left';
+    ctx.fillText(`${planName} (STD)`, PADX, y);
+    ctx.textAlign = 'right';
+    ctx.fillText(payment.status.toUpperCase(), C_QTY, y);
+    ctx.font      = `11px ${FONT}`;
+    ctx.fillText(`${_currency} ${origPrice.toFixed(2)}`, C_AMT, y);
+    y += 18;
+
+    // Row B: Discount Applied
+    let discTag = "DISCOUNT";
+    if (payment.discountType === "percentage" && payment.discountValue) {
+      discTag = `DISCOUNT (${payment.discountValue}%)`;
+    }
+    ctx.font      = `bold 11px ${FONT}`;
+    ctx.fillStyle = '#059669';
+    ctx.textAlign = 'left';
+    ctx.fillText(`- ${discTag}`, PADX, y);
+    ctx.textAlign = 'right';
+    ctx.fillText(`- ${_currency} ${discAmt.toFixed(2)}`, C_AMT, y);
+    y += 24;
+  } else {
+    ctx.font      = `11px ${FONT}`;
+    ctx.fillStyle = '#000000';
+    ctx.textAlign = 'left';
+    ctx.fillText(planName, PADX, y);
+    ctx.textAlign = 'right';
+    ctx.fillText(payment.status.toUpperCase(), C_QTY, y);
+    ctx.font      = `bold 11px ${FONT}`;
+    ctx.fillText(`${_currency} ${payment.amount.toFixed(2)}`, C_AMT, y);
+    y += 24;
+  }
 
   dSep();
 
@@ -218,6 +248,32 @@ async function _drawReceiptCanvas(payment, member, plan, settings) {
   return canvas;
 }
 
+function buildReceiptShareText(payment, member, plan, settings) {
+  const currency = settings?.currency || "INR";
+  const gymName = settings?.gymName || "GymFlow";
+  const origPrice = Number(payment.originalPrice || (payment.amount + (payment.discountAmount || 0)));
+  const discAmt = Number(payment.discountAmount || (origPrice > payment.amount ? origPrice - payment.amount : 0));
+  
+  let priceLines = `*Amount Paid:* ${money(payment.amount, currency)}\n`;
+  if (discAmt > 0) {
+    let discDesc = payment.discountType === "percentage" && payment.discountValue ? ` (${payment.discountValue}% Off)` : "";
+    priceLines = `*Standard Plan Price:* ${money(origPrice, currency)}\n` +
+      `*Discount Applied:* -${money(discAmt, currency)}${discDesc}\n` +
+      `*Total Paid:* ${money(payment.amount, currency)}\n`;
+  }
+
+  return `*Receipt from ${gymName}*\n\n` +
+    `*Receipt No:* ${payment.receiptNumber || payment.id}\n` +
+    `*Member:* ${member?.fullName || "Member"}\n` +
+    `*Plan:* ${plan?.planName || "Membership Plan"}\n` +
+    priceLines +
+    `*Date:* ${dateLabel(payment.date)}\n` +
+    `*Payment Method:* ${payment.method || "Cash"}\n` +
+    `*Status:* ${payment.status || "Paid"}\n` +
+    `${payment.notes ? `*Remarks:* ${payment.notes}\n` : ""}\n` +
+    `Thank you for your trust & payment!`;
+}
+
 export const paymentsModule = {
   activeReceiptPaymentId: null,
 
@@ -290,10 +346,22 @@ export const paymentsModule = {
             <label>Membership plan
               <select name="planId" required>
                 <option value="">Select plan</option>
-                ${plans.map(p => `<option value="${p.id}">${escapeHtml(p.planName)}</option>`).join("")}
+                ${plans.map(p => `<option value="${p.id}">${escapeHtml(p.planName)} (${p.price ? '₹' + p.price : 'Free'})</option>`).join("")}
               </select>
             </label>
-            <label>Amount<input name="amount" type="number" min="0" step="1" required /></label>
+            <label>Discount Rule
+              <select name="discountType" id="pmt-discount-type">
+                <option value="none">Standard Plan Price (No Discount)</option>
+                <option value="percentage">Percentage Discount (%)</option>
+                <option value="fixed">Fixed Reduction Amount (₹ Off)</option>
+                <option value="custom">Custom Price (Direct Override)</option>
+              </select>
+            </label>
+            <label id="pmt-discount-val-group" class="hidden">
+              <span id="pmt-discount-val-label">Discount Value</span>
+              <input name="discountValue" type="number" id="pmt-discount-val-input" min="0" step="any" placeholder="0" value="0" />
+            </label>
+            <label>Payable Amount<input name="amount" type="number" min="0" step="any" required /></label>
             <label>Date<input name="date" type="date" value="${today()}" required /></label>
             <label>Method
               <select name="method">
@@ -312,7 +380,7 @@ export const paymentsModule = {
               </select>
             </label>
             <label>Collected by<input name="collectedBy" value="${escapeHtml(context.profile?.name || "Owner")}" maxlength="80" /></label>
-            <label class="wide" style="grid-column: span 2;">Notes<textarea name="notes" rows="2" placeholder="Transaction remarks/details (e.g. UPI Ref ID, Cash change details)"></textarea></label>
+            <label class="wide" style="grid-column: span 2;">Notes<textarea name="notes" rows="2" placeholder="Transaction remarks/details (e.g. UPI Ref ID, Discount reason)"></textarea></label>
           </div>
           <div class="button-row" style="margin-top:15px;">
             <button class="primary-button" type="submit">Save payment</button>
@@ -368,22 +436,9 @@ export const paymentsModule = {
           });
 
           root.querySelector("#whatsapp-receipt-btn")?.addEventListener("click", () => {
-            const currency = context.settings?.currency || "INR";
             const phone = member?.whatsapp || member?.mobile || "";
             const formattedPhone = phone.replace(/[^0-9]/g, "");
-            const gymName = context.settings?.gymName || "GymFlow";
-
-            const text = `*Receipt from ${gymName}*\n\n` +
-              `*Receipt No:* ${payment.receiptNumber || payment.id}\n` +
-              `*Member:* ${member?.fullName || "Custom"}\n` +
-              `*Plan:* ${plan?.planName || "Custom"}\n` +
-              `*Amount:* ${money(payment.amount, currency)}\n` +
-              `*Date:* ${dateLabel(payment.date)}\n` +
-              `*Payment Method:* ${payment.method}\n` +
-              `*Status:* ${payment.status}\n` +
-              `${payment.notes ? `*Remarks:* ${payment.notes}\n` : ""}\n` +
-              `Thank you for your payment!`;
-
+            const text = buildReceiptShareText(payment, member, plan, context.settings);
             const waUrl = `https://wa.me/${formattedPhone ? formattedPhone : ""}?text=${encodeURIComponent(text)}`;
             window.open(waUrl, "_blank");
           });
@@ -401,23 +456,57 @@ export const paymentsModule = {
       const form = root.querySelector("#payment-form");
       if (!form) return;
 
+      const updateAmountFromDiscount = () => {
+        const plan = context.data.membership_plans.find((item) => item.id === form.planId.value);
+        const stdPrice = plan ? Number(plan.price || 0) : 0;
+        const discType = form.discountType.value;
+        const valGroup = root.querySelector("#pmt-discount-val-group");
+        const valLabel = root.querySelector("#pmt-discount-val-label");
+        const valInput = form.discountValue;
+
+        if (discType === "none") {
+          valGroup?.classList.add("hidden");
+          form.amount.value = stdPrice;
+        } else {
+          valGroup?.classList.remove("hidden");
+          if (discType === "percentage") {
+            if (valLabel) valLabel.textContent = "Discount Percentage (%)";
+          } else if (discType === "fixed") {
+            if (valLabel) valLabel.textContent = "Reduction Amount (₹ Off)";
+          } else if (discType === "custom") {
+            if (valLabel) valLabel.textContent = "Custom Total Fee (₹)";
+          }
+          let val = Math.max(0, Number(valInput.value) || 0);
+          let discAmount = 0;
+          let finalPrice = stdPrice;
+          if (discType === "percentage") {
+            val = Math.min(100, val);
+            discAmount = (stdPrice * val) / 100;
+            finalPrice = Math.max(0, stdPrice - discAmount);
+          } else if (discType === "fixed") {
+            discAmount = Math.min(stdPrice, val);
+            finalPrice = Math.max(0, stdPrice - discAmount);
+          } else if (discType === "custom") {
+            finalPrice = val;
+          }
+          form.amount.value = finalPrice;
+        }
+      };
+
       const handleMemberChange = () => {
         const member = context.data.members.find((item) => item.id === form.memberId.value);
         if (member?.planId) {
           form.planId.value = member.planId;
-          const plan = context.data.membership_plans.find((item) => item.id === member.planId);
-          if (plan) form.amount.value = plan.price || 0;
+          updateAmountFromDiscount();
         }
       };
 
       form.memberId.addEventListener("change", handleMemberChange);
+      form.planId.addEventListener("change", updateAmountFromDiscount);
+      form.discountType.addEventListener("change", updateAmountFromDiscount);
+      form.discountValue.addEventListener("input", updateAmountFromDiscount);
 
-      form.planId.addEventListener("change", () => {
-        const plan = context.data.membership_plans.find((item) => item.id === form.planId.value);
-        if (plan) form.amount.value = plan.price || 0;
-      });
-
-      // If we have a prefilled member, run selection logic immediately
+      // If prefilled member exists
       if (this.prefilledMemberId) {
         handleMemberChange();
       }
@@ -425,8 +514,28 @@ export const paymentsModule = {
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
         const payload = formData(form);
-        payload.amount = Number(payload.amount);
+        const plan = context.data.membership_plans.find((item) => item.id === payload.planId);
+        const stdPrice = plan ? Number(plan.price || 0) : 0;
+        const discType = payload.discountType || "none";
+        const discVal = Math.max(0, Number(payload.discountValue) || 0);
+        let discAmount = 0;
+        let finalPrice = Number(payload.amount);
+
+        if (discType === "percentage") {
+          discAmount = (stdPrice * Math.min(100, discVal)) / 100;
+        } else if (discType === "fixed") {
+          discAmount = Math.min(stdPrice, discVal);
+        } else if (discType === "custom") {
+          discAmount = Math.max(0, stdPrice - finalPrice);
+        }
+
+        payload.originalPrice = stdPrice;
+        payload.discountType = discType;
+        payload.discountValue = discVal;
+        payload.discountAmount = discAmount;
+        payload.amount = finalPrice;
         payload.receiptNumber = payload.receiptNumber || `RCPT-${Date.now().toString().slice(-8)}`;
+
         await withButtonLoading(form.querySelector("[type='submit']"), async () => {
           const saved = await context.services.data.save(collections.payments, payload);
           context.toast("Payment saved.");
@@ -468,32 +577,24 @@ export const paymentsModule = {
         const plan = context.data.membership_plans.find((item) => item.id === payment?.planId);
         if (!payment || !member) return;
         
-        const currency = context.settings?.currency || "INR";
         const phone = member.whatsapp || member.mobile || "";
         const formattedPhone = phone.replace(/[^0-9]/g, "");
-        
-        const text = `*Receipt from ${context.settings?.gymName || "GymFlow"}*\n\n` +
-          `*Receipt No:* ${payment.receiptNumber || payment.id}\n` +
-          `*Member:* ${member.fullName}\n` +
-          `*Plan:* ${plan?.planName || "Custom"}\n` +
-          `*Amount:* ${money(payment.amount, currency)}\n` +
-          `*Date:* ${dateLabel(payment.date)}\n` +
-          `*Payment Method:* ${payment.method}\n` +
-          `*Status:* ${payment.status}\n` +
-          `${payment.notes ? `*Remarks:* ${payment.notes}\n` : ""}\n` +
-          `Thank you for your payment!`;
-
+        const text = buildReceiptShareText(payment, member, plan, context.settings);
         const waUrl = `https://wa.me/${formattedPhone ? formattedPhone : ""}?text=${encodeURIComponent(text)}`;
         window.open(waUrl, "_blank");
       });
     });
   }
 };
- 
+
 function row(payment, members, plans, currency) {
   const planName = findName(plans, payment.planId);
   const method = escapeHtml(payment.method || "-");
+  const origPrice = Number(payment.originalPrice || (payment.amount + (payment.discountAmount || 0)));
+  const discAmt = Number(payment.discountAmount || (origPrice > payment.amount ? origPrice - payment.amount : 0));
   const noteSuffix = payment.notes ? ` · ${escapeHtml(payment.notes)}` : "";
+  const discBadge = discAmt > 0 ? `<small style="display:block; color:#10b981; font-size:0.75rem; font-weight:600;">(Discount -${money(discAmt, currency)})</small>` : "";
+
   return `
     <div class="table-row">
       <span data-label="Receipt">
@@ -501,7 +602,10 @@ function row(payment, members, plans, currency) {
         <small class="row-meta">${dateLabel(payment.date)} · ${method} · ${escapeHtml(planName)}${noteSuffix}</small>
       </span>
       <span data-label="Member">${nameCell(findName(members, payment.memberId), "", members.find(m => m.id === payment.memberId)?.avatarUrl || "")}</span>
-      <span data-label="Amount">${money(payment.amount, currency)}</span>
+      <span data-label="Amount">
+        ${money(payment.amount, currency)}
+        ${discBadge}
+      </span>
       <span data-label="Status"><mark class="status ${statusClass(payment.status)}">${escapeHtml(payment.status)}</mark></span>
       <span class="row-actions">
         <button class="icon-btn" data-receipt="${escapeHtml(payment.id)}" title="View Receipt"><span class="material-symbols-outlined">receipt_long</span></button>

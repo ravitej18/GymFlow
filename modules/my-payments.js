@@ -25,14 +25,22 @@ export const myPaymentsModule = {
                 <div class="table-head"><span>Receipt</span><span>Plan</span><span>Amount</span><span>Status</span></div>
                 ${mine
                   .map(
-                    (payment) => `
-                      <div class="table-row">
-                        <span><strong>${escapeHtml(payment.receiptNumber || payment.id)}</strong><small>${dateLabel(payment.date)} via ${escapeHtml(payment.method || "-")}</small></span>
-                        <span>${escapeHtml(findName(plans, payment.planId))}</span>
-                        <span>${money(payment.amount, currency)}</span>
-                        <span><mark class="status ${statusClass(payment.status)}">${escapeHtml(payment.status || "-")}</mark></span>
-                      </div>
-                    `
+                    (payment) => {
+                      const origPrice = Number(payment.originalPrice || (payment.amount + (payment.discountAmount || 0)));
+                      const discAmt = Number(payment.discountAmount || (origPrice > payment.amount ? origPrice - payment.amount : 0));
+                      const discTag = discAmt > 0 ? `<small style="display:block; color:#10b981; font-size:0.75rem; font-weight:600;">(Discount -${money(discAmt, currency)})</small>` : "";
+                      return `
+                        <div class="table-row">
+                          <span><strong>${escapeHtml(payment.receiptNumber || payment.id)}</strong><small>${dateLabel(payment.date)} via ${escapeHtml(payment.method || "-")}</small></span>
+                          <span>${escapeHtml(findName(plans, payment.planId))}</span>
+                          <span>
+                            ${money(payment.amount, currency)}
+                            ${discTag}
+                          </span>
+                          <span><mark class="status ${statusClass(payment.status)}">${escapeHtml(payment.status || "-")}</mark></span>
+                        </div>
+                      `;
+                    }
                   )
                   .join("")}
               </div>`

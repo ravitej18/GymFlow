@@ -382,6 +382,11 @@ async function reloadData(targetRoute = state.route) {
       return;
     }
 
+    // For owner role, bypass cache for check-ins so attendance is always freshly fetched from database
+    if (state.profile?.role === "owner" && needed.includes("attendance")) {
+      delete state.data.attendance;
+    }
+
     // Filter out collections already loaded in state.data
     const toFetch = needed.filter((name) => !state.data[name]);
 
@@ -1009,9 +1014,6 @@ Total members listed: ${(state.data.members || []).length}</pre>
             <strong>${escapeHtml(state.profile.name)}</strong>
             <span>${escapeHtml(state.profile.role)}</span>
           </div>
-        </div>
-        <div class="sidebar-attribution">
-          Made with <span class="heart">❤️</span> by <a href="https://github.com/SriSatyaLokesh" target="_blank" rel="noopener noreferrer">SriSatyaLokesh</a> &amp; <a href="https://github.com/ravitej18" target="_blank" rel="noopener noreferrer">Raviteja</a>
         </div>
       </div>
     </aside>
